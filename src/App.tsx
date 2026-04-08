@@ -649,6 +649,7 @@ export default function App() {
   const [search, setSearch] = useState('');
   const [filterPatente, setFilterPatente] = useState('');
   const [filterFuncao, setFilterFuncao] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('Todos');
   
   const [sortField, setSortField] = useState<keyof Member>('ordem');
   const [sortAsc, setSortAsc] = useState(true);
@@ -866,7 +867,10 @@ export default function App() {
                             item.funcao.toLowerCase().includes(searchLower);
         const matchPatente = filterPatente ? item.patente === filterPatente : true;
         const matchFuncao = filterFuncao ? item.funcao === filterFuncao : true;
-        return matchSearch && matchPatente && matchFuncao;
+        const matchStatus = filterStatus === 'Todos' ? true : 
+                            filterStatus === 'LTS/Afastados' ? ['Licença', 'Afastado'].includes(item.status) : 
+                            item.status === filterStatus;
+        return matchSearch && matchPatente && matchFuncao && matchStatus;
       })
       .sort((a, b) => {
         const valA = a[sortField];
@@ -879,7 +883,7 @@ export default function App() {
         if (strA > strB) return sortAsc ? 1 : -1;
         return 0;
       });
-  }, [members, search, filterPatente, filterFuncao, sortField, sortAsc]);
+  }, [members, search, filterPatente, filterFuncao, filterStatus, sortField, sortAsc]);
 
   const handleSort = (field: keyof Member) => {
     if (sortField === field) {
@@ -1200,22 +1204,34 @@ export default function App() {
           <div className="flex-1 flex flex-col p-4 md:p-6 overflow-hidden">
             {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 shrink-0">
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col">
-          <Users className="w-7 h-7 mb-2 text-slate-700" />
+        <div 
+          onClick={() => setFilterStatus('Todos')}
+          className={`bg-white p-5 rounded-lg shadow-sm border flex flex-col cursor-pointer transition-all ${filterStatus === 'Todos' ? 'border-blue-500 ring-2 ring-blue-200' : 'border-slate-200 hover:border-blue-300'}`}
+        >
+          <Users className={`w-7 h-7 mb-2 ${filterStatus === 'Todos' ? 'text-blue-600' : 'text-slate-700'}`} />
           <div className="text-3xl font-bold text-slate-900">{stats.total}</div>
           <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Efetivo Total</div>
         </div>
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-green-500 flex flex-col">
+        <div 
+          onClick={() => setFilterStatus('Ativo')}
+          className={`bg-white p-5 rounded-lg shadow-sm border border-b-4 border-b-green-500 flex flex-col cursor-pointer transition-all ${filterStatus === 'Ativo' ? 'border-green-500 ring-2 ring-green-200' : 'border-slate-200 hover:border-green-300'}`}
+        >
           <CheckCircle className="w-7 h-7 mb-2 text-green-500" />
           <div className="text-3xl font-bold text-green-600">{stats.active}</div>
           <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Pronto Emprego</div>
         </div>
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-yellow-500 flex flex-col">
+        <div 
+          onClick={() => setFilterStatus('Férias')}
+          className={`bg-white p-5 rounded-lg shadow-sm border border-b-4 border-b-yellow-500 flex flex-col cursor-pointer transition-all ${filterStatus === 'Férias' ? 'border-yellow-500 ring-2 ring-yellow-200' : 'border-slate-200 hover:border-yellow-300'}`}
+        >
           <Sun className="w-7 h-7 mb-2 text-yellow-500" />
           <div className="text-3xl font-bold text-yellow-600">{stats.vacation}</div>
           <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Férias</div>
         </div>
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-red-500 flex flex-col">
+        <div 
+          onClick={() => setFilterStatus('LTS/Afastados')}
+          className={`bg-white p-5 rounded-lg shadow-sm border border-b-4 border-b-red-500 flex flex-col cursor-pointer transition-all ${filterStatus === 'LTS/Afastados' ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 hover:border-red-300'}`}
+        >
           <Activity className="w-7 h-7 mb-2 text-red-500" />
           <div className="text-3xl font-bold text-red-600">{stats.away}</div>
           <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">LTS / Afastados</div>
