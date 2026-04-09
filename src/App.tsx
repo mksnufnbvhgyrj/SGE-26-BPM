@@ -767,7 +767,7 @@ export default function App() {
             read: false
           };
           
-          setMembers(members.map(m => 
+          setMembers(prevMembers => prevMembers.map(m => 
             m.id === selectedFichaMemberId 
               ? { 
                   ...m, 
@@ -1016,16 +1016,25 @@ export default function App() {
   const handleAudienciaFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === 'application/pdf') {
-      const url = URL.createObjectURL(file);
-      const newPdf = {
-        id: Math.random().toString(36).substring(7),
-        name: file.name,
-        url: url
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('O arquivo excede o limite de 5MB.', 'danger');
+        e.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        const newPdf = {
+          id: Math.random().toString(36).substring(7),
+          name: file.name,
+          url: base64String
+        };
+        setAudienciaFormData(prev => ({
+          ...prev,
+          pdfs: [...(prev.pdfs || []), newPdf]
+        }));
       };
-      setAudienciaFormData({
-        ...audienciaFormData,
-        pdfs: [...(audienciaFormData.pdfs || []), newPdf]
-      });
+      reader.readAsDataURL(file);
     } else if (file) {
       showToast('Por favor, selecione apenas arquivos PDF.', 'danger');
     }
@@ -1340,7 +1349,7 @@ export default function App() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-4 py-16 text-center text-slate-500">
+                  <td colSpan={8} className="px-4 py-16 text-center text-slate-500">
                     <div className="flex flex-col items-center justify-center">
                       <FolderOpen className="w-12 h-12 text-slate-300 mb-3" />
                       <p className="text-base">Nenhum registro encontrado com os filtros atuais.</p>
@@ -1448,7 +1457,7 @@ export default function App() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-4 py-16 text-center text-slate-500">
+                  <td colSpan={7} className="px-4 py-16 text-center text-slate-500">
                     <div className="flex flex-col items-center justify-center">
                       <Scale className="w-12 h-12 text-slate-300 mb-3" />
                       <p className="text-base">Nenhuma audiência cadastrada.</p>
@@ -2190,8 +2199,17 @@ export default function App() {
                       onChange={e => {
                         const file = e.target.files?.[0];
                         if (file && file.type === 'application/pdf') {
-                          const url = URL.createObjectURL(file);
-                          setFormData({...formData, pdfName: file.name, pdfUrl: url});
+                          if (file.size > 5 * 1024 * 1024) {
+                            alert('O arquivo excede o limite de 5MB.');
+                            e.target.value = '';
+                            return;
+                          }
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            const base64String = reader.result as string;
+                            setFormData(prev => ({...prev, pdfName: file.name, pdfUrl: base64String}));
+                          };
+                          reader.readAsDataURL(file);
                         } else if (file) {
                           alert('Por favor, selecione um arquivo PDF válido.');
                           e.target.value = '';
