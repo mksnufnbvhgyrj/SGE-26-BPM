@@ -1,11 +1,15 @@
-# .github/workflows/deploy.yml
+# Workflow para construir e implantar o aplicativo React/Vite no GitHub Pages
 name: Deploy static content to Pages
 
 on:
+  # Executa ao fazer push na branch principal
   push:
     branches: ["main"]
+
+  # Permite execução manual
   workflow_dispatch:
 
+# Configura permissões do GITHUB_TOKEN
 permissions:
   contents: read
   pages: write
@@ -25,31 +29,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 1. Prepara o Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      # 2. Instala as dependências
       - name: Install dependencies
         run: npm install
 
-      # 3. Compila o aplicativo React/Vite
       - name: Build project
         run: npm run build
         env:
+          # Variáveis de ambiente necessárias durante o build
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # 4. Faz o upload APENAS da pasta 'dist' gerada pelo build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          # Faz o upload APENAS da pasta 'dist' (código compilado), e não do repositório inteiro
           path: './dist'
 
       - name: Deploy to GitHub Pages
