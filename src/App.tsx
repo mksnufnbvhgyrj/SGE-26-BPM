@@ -649,7 +649,6 @@ export default function App() {
   const [search, setSearch] = useState('');
   const [filterPatente, setFilterPatente] = useState('');
   const [filterFuncao, setFilterFuncao] = useState('');
-  const [filterStatus, setFilterStatus] = useState<string>('Todos');
   
   const [sortField, setSortField] = useState<keyof Member>('ordem');
   const [sortAsc, setSortAsc] = useState(true);
@@ -768,7 +767,7 @@ export default function App() {
             read: false
           };
           
-          setMembers(prevMembers => prevMembers.map(m => 
+          setMembers(members.map(m => 
             m.id === selectedFichaMemberId 
               ? { 
                   ...m, 
@@ -867,10 +866,7 @@ export default function App() {
                             item.funcao.toLowerCase().includes(searchLower);
         const matchPatente = filterPatente ? item.patente === filterPatente : true;
         const matchFuncao = filterFuncao ? item.funcao === filterFuncao : true;
-        const matchStatus = filterStatus === 'Todos' ? true : 
-                            filterStatus === 'LTS/Afastados' ? ['Licença', 'Afastado'].includes(item.status) : 
-                            item.status === filterStatus;
-        return matchSearch && matchPatente && matchFuncao && matchStatus;
+        return matchSearch && matchPatente && matchFuncao;
       })
       .sort((a, b) => {
         const valA = a[sortField];
@@ -883,7 +879,7 @@ export default function App() {
         if (strA > strB) return sortAsc ? 1 : -1;
         return 0;
       });
-  }, [members, search, filterPatente, filterFuncao, filterStatus, sortField, sortAsc]);
+  }, [members, search, filterPatente, filterFuncao, sortField, sortAsc]);
 
   const handleSort = (field: keyof Member) => {
     if (sortField === field) {
@@ -1020,20 +1016,16 @@ export default function App() {
   const handleAudienciaFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === 'application/pdf') {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        const newPdf = {
-          id: Math.random().toString(36).substring(7),
-          name: file.name,
-          url: base64String
-        };
-        setAudienciaFormData(prev => ({
-          ...prev,
-          pdfs: [...(prev.pdfs || []), newPdf]
-        }));
+      const url = URL.createObjectURL(file);
+      const newPdf = {
+        id: Math.random().toString(36).substring(7),
+        name: file.name,
+        url: url
       };
-      reader.readAsDataURL(file);
+      setAudienciaFormData({
+        ...audienciaFormData,
+        pdfs: [...(audienciaFormData.pdfs || []), newPdf]
+      });
     } else if (file) {
       showToast('Por favor, selecione apenas arquivos PDF.', 'danger');
     }
@@ -1208,34 +1200,22 @@ export default function App() {
           <div className="flex-1 flex flex-col p-4 md:p-6 overflow-hidden">
             {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 shrink-0">
-        <div 
-          onClick={() => setFilterStatus('Todos')}
-          className={`bg-white p-5 rounded-lg shadow-sm border flex flex-col cursor-pointer transition-all ${filterStatus === 'Todos' ? 'border-blue-500 ring-2 ring-blue-200' : 'border-slate-200 hover:border-blue-300'}`}
-        >
-          <Users className={`w-7 h-7 mb-2 ${filterStatus === 'Todos' ? 'text-blue-600' : 'text-slate-700'}`} />
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col">
+          <Users className="w-7 h-7 mb-2 text-slate-700" />
           <div className="text-3xl font-bold text-slate-900">{stats.total}</div>
           <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Efetivo Total</div>
         </div>
-        <div 
-          onClick={() => setFilterStatus('Ativo')}
-          className={`bg-white p-5 rounded-lg shadow-sm border border-b-4 border-b-green-500 flex flex-col cursor-pointer transition-all ${filterStatus === 'Ativo' ? 'border-green-500 ring-2 ring-green-200' : 'border-slate-200 hover:border-green-300'}`}
-        >
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-green-500 flex flex-col">
           <CheckCircle className="w-7 h-7 mb-2 text-green-500" />
           <div className="text-3xl font-bold text-green-600">{stats.active}</div>
           <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Pronto Emprego</div>
         </div>
-        <div 
-          onClick={() => setFilterStatus('Férias')}
-          className={`bg-white p-5 rounded-lg shadow-sm border border-b-4 border-b-yellow-500 flex flex-col cursor-pointer transition-all ${filterStatus === 'Férias' ? 'border-yellow-500 ring-2 ring-yellow-200' : 'border-slate-200 hover:border-yellow-300'}`}
-        >
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-yellow-500 flex flex-col">
           <Sun className="w-7 h-7 mb-2 text-yellow-500" />
           <div className="text-3xl font-bold text-yellow-600">{stats.vacation}</div>
           <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Férias</div>
         </div>
-        <div 
-          onClick={() => setFilterStatus('LTS/Afastados')}
-          className={`bg-white p-5 rounded-lg shadow-sm border border-b-4 border-b-red-500 flex flex-col cursor-pointer transition-all ${filterStatus === 'LTS/Afastados' ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 hover:border-red-300'}`}
-        >
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-red-500 flex flex-col">
           <Activity className="w-7 h-7 mb-2 text-red-500" />
           <div className="text-3xl font-bold text-red-600">{stats.away}</div>
           <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">LTS / Afastados</div>
@@ -1360,7 +1340,7 @@ export default function App() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center text-slate-500">
+                  <td colSpan={7} className="px-4 py-16 text-center text-slate-500">
                     <div className="flex flex-col items-center justify-center">
                       <FolderOpen className="w-12 h-12 text-slate-300 mb-3" />
                       <p className="text-base">Nenhum registro encontrado com os filtros atuais.</p>
@@ -1468,7 +1448,7 @@ export default function App() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-4 py-16 text-center text-slate-500">
+                  <td colSpan={6} className="px-4 py-16 text-center text-slate-500">
                     <div className="flex flex-col items-center justify-center">
                       <Scale className="w-12 h-12 text-slate-300 mb-3" />
                       <p className="text-base">Nenhuma audiência cadastrada.</p>
@@ -2210,12 +2190,8 @@ export default function App() {
                       onChange={e => {
                         const file = e.target.files?.[0];
                         if (file && file.type === 'application/pdf') {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            const base64String = reader.result as string;
-                            setFormData(prev => ({...prev, pdfName: file.name, pdfUrl: base64String}));
-                          };
-                          reader.readAsDataURL(file);
+                          const url = URL.createObjectURL(file);
+                          setFormData({...formData, pdfName: file.name, pdfUrl: url});
                         } else if (file) {
                           alert('Por favor, selecione um arquivo PDF válido.');
                           e.target.value = '';
