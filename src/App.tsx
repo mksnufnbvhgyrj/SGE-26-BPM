@@ -628,22 +628,22 @@ export default function App() {
     loadData();
   }, []);
 
-  // Sync members to Supabase when changed
+  // Sync members to Supabase when changed (debounced)
   useEffect(() => {
     if (isLoadingData) return;
-    const syncMembers = async () => {
+    const timeoutId = setTimeout(async () => {
       await supabase.from('app_store').upsert({ key: 'members', value: members });
-    };
-    syncMembers();
+    }, 1000);
+    return () => clearTimeout(timeoutId);
   }, [members, isLoadingData]);
 
-  // Sync audiencias to Supabase when changed
+  // Sync audiencias to Supabase when changed (debounced)
   useEffect(() => {
     if (isLoadingData) return;
-    const syncAudiencias = async () => {
+    const timeoutId = setTimeout(async () => {
       await supabase.from('app_store').upsert({ key: 'audiencias', value: audiencias });
-    };
-    syncAudiencias();
+    }, 1000);
+    return () => clearTimeout(timeoutId);
   }, [audiencias, isLoadingData]);
 
   const [search, setSearch] = useState('');
