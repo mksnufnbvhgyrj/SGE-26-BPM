@@ -726,7 +726,7 @@ export default function App() {
     }
   };
 
-  const processAnexoFiles = (files: FileList | File[]) => {
+  const processAnexoFiles = async (files: FileList | File[]) => {
     if (!selectedFichaMemberId) return;
     const member = members.find(m => m.id === selectedFichaMemberId);
     if (!member) return;
@@ -742,45 +742,49 @@ export default function App() {
 
     if (validFiles.length === 0) return;
 
-    const newAnexos: Anexo[] = [];
-    let processedFiles = 0;
+    try {
+      const newAnexos = await Promise.all(
+        validFiles.map((file: File) => {
+          return new Promise<Anexo>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64String = reader.result as string;
+              resolve({
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                name: file.name,
+                url: base64String,
+                type: file.type || 'application/octet-stream',
+                date: new Date().toISOString(),
+                size: file.size
+              });
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        })
+      );
 
-    validFiles.forEach((file: File) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        newAnexos.push({
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-          name: file.name,
-          url: base64String,
-          type: file.type || 'application/octet-stream',
-          date: new Date().toISOString(),
-          size: file.size
-        });
-
-        processedFiles++;
-        if (processedFiles === validFiles.length) {
-          const newNotification: Notification = {
-            id: Date.now().toString(),
-            message: 'Novos anexos foram adicionados à sua ficha.',
-            date: new Date().toISOString(),
-            read: false
-          };
-          
-          setMembers(prevMembers => prevMembers.map(m => 
-            m.id === selectedFichaMemberId 
-              ? { 
-                  ...m, 
-                  anexos: [...(m.anexos || []), ...newAnexos],
-                  notifications: [newNotification, ...(m.notifications || [])]
-                } 
-              : m
-          ));
-          showToast('Anexos importados com sucesso!', 'success');
-        }
+      const newNotification: Notification = {
+        id: Date.now().toString(),
+        message: 'Novos anexos foram adicionados à sua ficha.',
+        date: new Date().toISOString(),
+        read: false
       };
-      reader.readAsDataURL(file);
-    });
+      
+      setMembers(prevMembers => prevMembers.map(m => 
+        m.id === selectedFichaMemberId 
+          ? { 
+              ...m, 
+              anexos: [...(m.anexos || []), ...newAnexos],
+              notifications: [newNotification, ...(m.notifications || [])]
+            } 
+          : m
+      ));
+      showToast('Anexos importados com sucesso!', 'success');
+    } catch (error) {
+      console.error('Erro ao processar anexos:', error);
+      showToast('Ocorreu um erro ao processar os arquivos.', 'danger');
+    }
   };
 
   const handleUploadAnexo = (e: React.ChangeEvent<HTMLInputElement>) => {
