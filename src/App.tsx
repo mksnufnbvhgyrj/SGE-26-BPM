@@ -664,7 +664,7 @@ export default function App() {
   const [fichaSearch, setFichaSearch] = useState('');
   const [selectedFichaMemberId, setSelectedFichaMemberId] = useState<number | null>(null);
   const [activeFichaSection, setActiveFichaSection] = useState<string | null>(null);
-  const [fichaFormData, setFichaFormData] = useState<any>({});
+  const [fichaFormData, setFichaFormData] = useState<Partial<Member>>({});
   const [isDraggingAnexo, setIsDraggingAnexo] = useState(false);
 
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'danger' } | null>(null);
@@ -1925,6 +1925,7 @@ export default function App() {
                   
                   {/* Botão Especial: Gerar Ficha Individual */}
                   <button 
+                    onClick={() => window.print()}
                     className="bg-blue-600 border border-blue-700 rounded-lg p-4 flex flex-col items-center justify-center gap-3 hover:bg-blue-700 text-white transition-colors shadow-sm group"
                   >
                     <Printer className="w-8 h-8 text-blue-200 group-hover:text-white transition-colors" />
