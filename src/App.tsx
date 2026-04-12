@@ -368,10 +368,10 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
                     <thead className="bg-slate-50 text-slate-500">
                       <tr>
                         <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Data/Hora</th>
-                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Local</th>
-                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Processo</th>
+                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Local</th>
+                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Processo</th>
                         <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Status</th>
-                        <th className="px-5 py-3 text-center font-semibold uppercase tracking-wider border-b border-slate-200">Doc</th>
+                        <th className="px-5 py-3 text-center font-semibold uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Doc</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -380,8 +380,8 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
                           <td className="px-5 py-4 font-medium text-slate-900 whitespace-nowrap">
                             {new Date(item.data).toLocaleDateString('pt-BR')} <span className="text-slate-400 font-normal">às</span> {item.hora}
                           </td>
-                          <td className="px-5 py-4 text-slate-700">{item.local}</td>
-                          <td className="px-5 py-4 text-slate-700 font-mono text-xs">{item.processo}</td>
+                          <td className="px-5 py-4 text-slate-700 hidden md:table-cell">{item.local}</td>
+                          <td className="px-5 py-4 text-slate-700 font-mono text-xs hidden md:table-cell">{item.processo}</td>
                           <td className="px-5 py-4">
                             <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${
                               item.status === 'Agendada' ? 'bg-blue-100 text-blue-700' :
@@ -391,7 +391,7 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
                               {item.status}
                             </span>
                           </td>
-                          <td className="px-5 py-4 text-center">
+                          <td className="px-5 py-4 text-center hidden md:table-cell">
                             {item.pdfs && item.pdfs.length > 0 ? (
                               <div className="flex items-center justify-center gap-1 flex-wrap">
                                 {item.pdfs.map((pdf, idx) => (
@@ -647,6 +647,13 @@ export default function App() {
   }, [audiencias, isLoadingData]);
 
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const [filterPatente, setFilterPatente] = useState('');
   const [filterFuncao, setFilterFuncao] = useState('');
   
@@ -662,6 +669,13 @@ export default function App() {
   const [audienciaFormData, setAudienciaFormData] = useState<Partial<Audiencia>>({ status: 'Agendada' });
   
   const [fichaSearch, setFichaSearch] = useState('');
+  const [debouncedFichaSearch, setDebouncedFichaSearch] = useState('');
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedFichaSearch(fichaSearch), 300);
+    return () => clearTimeout(timer);
+  }, [fichaSearch]);
+
   const [selectedFichaMemberId, setSelectedFichaMemberId] = useState<number | null>(null);
   const [activeFichaSection, setActiveFichaSection] = useState<string | null>(null);
   const [fichaFormData, setFichaFormData] = useState<Partial<Member>>({});
@@ -851,20 +865,20 @@ export default function App() {
   const uniqueFuncoes = useMemo(() => [...new Set(members.map(m => m.funcao))].sort(), [members]);
 
   const filteredFichaMembers = useMemo(() => {
-    if (!fichaSearch.trim()) return [];
+    if (!debouncedFichaSearch.trim()) return [];
     
-    const searchLower = fichaSearch.toLowerCase();
+    const searchLower = debouncedFichaSearch.toLowerCase();
     return members.filter(item => 
       item.nome.toLowerCase().includes(searchLower) || 
       item.matricula.includes(searchLower) || 
       item.id.toString() === searchLower
     );
-  }, [members, fichaSearch]);
+  }, [members, debouncedFichaSearch]);
 
   const filteredAndSortedMembers = useMemo(() => {
     return members
       .filter(item => {
-        const searchLower = search.toLowerCase();
+        const searchLower = debouncedSearch.toLowerCase();
         const matchSearch = item.nome.toLowerCase().includes(searchLower) || 
                             item.matricula.includes(searchLower) || 
                             item.funcao.toLowerCase().includes(searchLower);
@@ -1212,26 +1226,26 @@ export default function App() {
         {activeAdminTab === 'efetivo' && (
           <div className="flex-1 flex flex-col p-4 md:p-6 overflow-hidden">
             {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 shrink-0">
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col">
-          <Users className="w-7 h-7 mb-2 text-slate-700" />
-          <div className="text-3xl font-bold text-slate-900">{stats.total}</div>
-          <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Efetivo Total</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 shrink-0">
+        <div className="bg-white p-3 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col">
+          <Users className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-slate-700" />
+          <div className="text-xl md:text-3xl font-bold text-slate-900">{stats.total}</div>
+          <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Efetivo Total</div>
         </div>
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-green-500 flex flex-col">
-          <CheckCircle className="w-7 h-7 mb-2 text-green-500" />
-          <div className="text-3xl font-bold text-green-600">{stats.active}</div>
-          <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Pronto Emprego</div>
+        <div className="bg-white p-3 md:p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-green-500 flex flex-col">
+          <CheckCircle className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-green-500" />
+          <div className="text-xl md:text-3xl font-bold text-green-600">{stats.active}</div>
+          <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Pronto Emprego</div>
         </div>
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-yellow-500 flex flex-col">
-          <Sun className="w-7 h-7 mb-2 text-yellow-500" />
-          <div className="text-3xl font-bold text-yellow-600">{stats.vacation}</div>
-          <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Férias</div>
+        <div className="bg-white p-3 md:p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-yellow-500 flex flex-col">
+          <Sun className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-yellow-500" />
+          <div className="text-xl md:text-3xl font-bold text-yellow-600">{stats.vacation}</div>
+          <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Férias</div>
         </div>
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-red-500 flex flex-col">
-          <Activity className="w-7 h-7 mb-2 text-red-500" />
-          <div className="text-3xl font-bold text-red-600">{stats.away}</div>
-          <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">LTS / Afastados</div>
+        <div className="bg-white p-3 md:p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-red-500 flex flex-col">
+          <Activity className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-red-500" />
+          <div className="text-xl md:text-3xl font-bold text-red-600">{stats.away}</div>
+          <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">LTS / Afastados</div>
         </div>
       </div>
 
@@ -1271,17 +1285,17 @@ export default function App() {
             <thead className="bg-slate-50 sticky top-0 z-10">
               <tr>
                 {[
-                  { key: 'ordem', label: 'Ordem' },
-                  { key: 'matricula', label: 'Matrícula' },
-                  { key: 'patente', label: 'Patente' },
-                  { key: 'nome', label: 'Nome' },
-                  { key: 'funcao', label: 'Função' },
-                  { key: 'status', label: 'Status' }
+                  { key: 'ordem', label: 'Ordem', hideOnMobile: true },
+                  { key: 'matricula', label: 'Matrícula', hideOnMobile: true },
+                  { key: 'patente', label: 'Patente', hideOnMobile: false },
+                  { key: 'nome', label: 'Nome', hideOnMobile: false },
+                  { key: 'funcao', label: 'Função', hideOnMobile: true },
+                  { key: 'status', label: 'Status', hideOnMobile: false }
                 ].map((col) => (
                   <th 
                     key={col.key}
                     onClick={() => handleSort(col.key as keyof Member)}
-                    className="px-4 py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors"
+                    className={`px-4 py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors ${col.hideOnMobile ? 'hidden md:table-cell' : ''}`}
                   >
                     <div className="flex items-center gap-1">
                       {col.label}
@@ -1289,7 +1303,7 @@ export default function App() {
                     </div>
                   </th>
                 ))}
-                <th className="px-4 py-3 text-center font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                <th className="px-4 py-3 text-center font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">
                   Doc
                 </th>
                 <th className="px-4 py-3 text-right font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
@@ -1308,8 +1322,8 @@ export default function App() {
                       setActiveAdminTab('ficha_individual');
                     }}
                   >
-                    <td className="px-4 py-3 border-b border-slate-100 text-slate-500 font-mono">#{item.ordem}</td>
-                    <td className="px-4 py-3 border-b border-slate-100 font-medium text-slate-900">{item.matricula}</td>
+                    <td className="px-4 py-3 border-b border-slate-100 text-slate-500 font-mono hidden md:table-cell">#{item.ordem}</td>
+                    <td className="px-4 py-3 border-b border-slate-100 font-medium text-slate-900 hidden md:table-cell">{item.matricula}</td>
                     <td className="px-4 py-3 border-b border-slate-100 text-slate-700">{item.patente}</td>
                     <td className="px-4 py-3 border-b border-slate-100">
                       <div className="flex items-center gap-3">
@@ -1326,13 +1340,13 @@ export default function App() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 border-b border-slate-100 text-slate-700">{item.funcao}</td>
+                    <td className="px-4 py-3 border-b border-slate-100 text-slate-700 hidden md:table-cell">{item.funcao}</td>
                     <td className="px-4 py-3 border-b border-slate-100">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${getStatusClasses(item.status)}`}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 border-b border-slate-100 text-center">
+                    <td className="px-4 py-3 border-b border-slate-100 text-center hidden md:table-cell">
                       {item.pdfUrl ? (
                         <a href={item.pdfUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title={item.pdfName}>
                           <FileText className="w-4 h-4" />
@@ -1383,11 +1397,11 @@ export default function App() {
             <thead className="bg-slate-50 sticky top-0 z-10">
               <tr>
                 <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Data/Hora</th>
-                <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Local</th>
-                <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Processo</th>
+                <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Local</th>
+                <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Processo</th>
                 <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Policiais Convocados</th>
                 <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Status</th>
-                <th className="px-4 py-3 text-center font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Doc</th>
+                <th className="px-4 py-3 text-center font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Doc</th>
                 <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 text-right">Ações</th>
               </tr>
             </thead>
@@ -1527,9 +1541,6 @@ export default function App() {
         </div>
         
         <div className="flex flex-wrap gap-2 w-full md:w-auto relative">
-          <select className="w-full md:w-auto min-w-[140px] px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50 text-slate-500" disabled title="Filtro futuro">
-            <option>Filtrar por...</option>
-          </select>
           <div className="relative flex-1 md:w-auto md:min-w-[300px]">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
