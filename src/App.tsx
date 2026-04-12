@@ -656,6 +656,7 @@ export default function App() {
 
   const [filterPatente, setFilterPatente] = useState('');
   const [filterFuncao, setFilterFuncao] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
   
   const [sortField, setSortField] = useState<keyof Member>('ordem');
   const [sortAsc, setSortAsc] = useState(true);
@@ -884,7 +885,13 @@ export default function App() {
                             item.funcao.toLowerCase().includes(searchLower);
         const matchPatente = filterPatente ? item.patente === filterPatente : true;
         const matchFuncao = filterFuncao ? item.funcao === filterFuncao : true;
-        return matchSearch && matchPatente && matchFuncao;
+        
+        let matchStatus = true;
+        if (filterStatus === 'Ativo') matchStatus = item.status === 'Ativo';
+        if (filterStatus === 'Férias') matchStatus = item.status === 'Férias';
+        if (filterStatus === 'Afastados') matchStatus = item.status === 'Licença' || item.status === 'Afastado';
+
+        return matchSearch && matchPatente && matchFuncao && matchStatus;
       })
       .sort((a, b) => {
         const valA = a[sortField];
@@ -897,7 +904,7 @@ export default function App() {
         if (strA > strB) return sortAsc ? 1 : -1;
         return 0;
       });
-  }, [members, search, filterPatente, filterFuncao, sortField, sortAsc]);
+  }, [members, search, filterPatente, filterFuncao, filterStatus, sortField, sortAsc]);
 
   const handleSort = (field: keyof Member) => {
     if (sortField === field) {
@@ -1227,26 +1234,38 @@ export default function App() {
           <div className="flex-1 flex flex-col p-4 md:p-6 overflow-hidden">
             {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 shrink-0">
-        <div className="bg-white p-3 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col">
+        <button 
+          onClick={() => setFilterStatus('')}
+          className={`bg-white p-3 md:p-5 rounded-lg shadow-sm border flex flex-col text-left transition-all ${filterStatus === '' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'}`}
+        >
           <Users className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-slate-700" />
           <div className="text-xl md:text-3xl font-bold text-slate-900">{stats.total}</div>
           <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Efetivo Total</div>
-        </div>
-        <div className="bg-white p-3 md:p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-green-500 flex flex-col">
+        </button>
+        <button 
+          onClick={() => setFilterStatus('Ativo')}
+          className={`bg-white p-3 md:p-5 rounded-lg shadow-sm border-x border-t border-b-4 border-b-green-500 flex flex-col text-left transition-all ${filterStatus === 'Ativo' ? 'border-x-green-500 border-t-green-500 ring-2 ring-green-500/20 bg-green-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
+        >
           <CheckCircle className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-green-500" />
           <div className="text-xl md:text-3xl font-bold text-green-600">{stats.active}</div>
           <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Pronto Emprego</div>
-        </div>
-        <div className="bg-white p-3 md:p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-yellow-500 flex flex-col">
+        </button>
+        <button 
+          onClick={() => setFilterStatus('Férias')}
+          className={`bg-white p-3 md:p-5 rounded-lg shadow-sm border-x border-t border-b-4 border-b-yellow-500 flex flex-col text-left transition-all ${filterStatus === 'Férias' ? 'border-x-yellow-500 border-t-yellow-500 ring-2 ring-yellow-500/20 bg-yellow-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
+        >
           <Sun className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-yellow-500" />
           <div className="text-xl md:text-3xl font-bold text-yellow-600">{stats.vacation}</div>
           <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Férias</div>
-        </div>
-        <div className="bg-white p-3 md:p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-red-500 flex flex-col">
+        </button>
+        <button 
+          onClick={() => setFilterStatus('Afastados')}
+          className={`bg-white p-3 md:p-5 rounded-lg shadow-sm border-x border-t border-b-4 border-b-red-500 flex flex-col text-left transition-all ${filterStatus === 'Afastados' ? 'border-x-red-500 border-t-red-500 ring-2 ring-red-500/20 bg-red-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
+        >
           <Activity className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-red-500" />
           <div className="text-xl md:text-3xl font-bold text-red-600">{stats.away}</div>
           <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">LTS / Afastados</div>
-        </div>
+        </button>
       </div>
 
       {/* Toolbar */}
