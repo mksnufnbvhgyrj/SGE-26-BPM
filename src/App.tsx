@@ -1518,15 +1518,15 @@ export default function App() {
   {activeAdminTab === 'administrativo' && (
     <div className="flex-1 overflow-auto p-4 md:p-6">
       <h3 className="text-lg font-medium text-slate-900 mb-4">Módulo Administrativo</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
         <button 
           onClick={() => setActiveAdminTab('ficha_individual')}
-          className="bg-white p-8 rounded-lg border border-slate-200 flex flex-col items-center justify-center gap-4 hover:bg-slate-50 hover:border-blue-300 hover:shadow-md transition-all group"
+          className="bg-white p-4 md:p-8 rounded-lg border border-slate-200 flex flex-col items-center justify-center gap-2 md:gap-4 hover:bg-slate-50 hover:border-blue-300 hover:shadow-md transition-all group"
         >
-          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
-            <FileText className="w-8 h-8" />
+          <div className="w-10 h-10 md:w-16 md:h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <FileText className="w-5 h-5 md:w-8 md:h-8" />
           </div>
-          <span className="font-medium text-slate-800 text-lg">Ficha Individual</span>
+          <span className="font-medium text-slate-800 text-sm md:text-lg">Ficha Individual</span>
         </button>
       </div>
     </div>
@@ -1946,20 +1946,20 @@ export default function App() {
                     <button 
                       key={idx}
                       onClick={() => setActiveFichaSection(section.name)}
-                      className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex flex-col items-center justify-center gap-3 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors text-slate-600 group"
+                      className="bg-slate-50 border border-slate-200 rounded-lg p-3 md:p-4 flex flex-col items-center justify-center gap-2 md:gap-3 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors text-slate-600 group"
                     >
-                      <section.icon className="w-8 h-8 text-slate-400 group-hover:text-blue-600 transition-colors" />
-                      <span className="text-sm font-medium text-center leading-tight">{section.name}</span>
+                      <section.icon className="w-5 h-5 md:w-8 md:h-8 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                      <span className="text-[10px] md:text-sm font-medium text-center leading-tight">{section.name}</span>
                     </button>
                   ))}
                   
                   {/* Botão Especial: Gerar Ficha Individual */}
                   <button 
                     onClick={() => window.print()}
-                    className="bg-blue-600 border border-blue-700 rounded-lg p-4 flex flex-col items-center justify-center gap-3 hover:bg-blue-700 text-white transition-colors shadow-sm group"
+                    className="bg-blue-600 border border-blue-700 rounded-lg p-3 md:p-4 flex flex-col items-center justify-center gap-2 md:gap-3 hover:bg-blue-700 text-white transition-colors shadow-sm group"
                   >
-                    <Printer className="w-8 h-8 text-blue-200 group-hover:text-white transition-colors" />
-                    <span className="text-sm font-medium text-center leading-tight">Gerar Ficha Individual</span>
+                    <Printer className="w-5 h-5 md:w-8 md:h-8 text-blue-200 group-hover:text-white transition-colors" />
+                    <span className="text-[10px] md:text-sm font-medium text-center leading-tight">Gerar Ficha Individual</span>
                   </button>
                 </div>
               )}
