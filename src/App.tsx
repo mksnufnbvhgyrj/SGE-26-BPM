@@ -273,7 +273,7 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
             </button>
             
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
+              <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-[320px] bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
                 <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                   <h4 className="font-semibold text-slate-800">Notificações</h4>
                   {unreadCount > 0 && <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{unreadCount} novas</span>}
@@ -457,7 +457,7 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pl-2">
+                          <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity pl-2">
                             <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Baixar">
                               <Download className="w-4 h-4" />
                             </a>
@@ -654,8 +654,6 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const [filterPatente, setFilterPatente] = useState('');
-  const [filterFuncao, setFilterFuncao] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   
   const [sortField, setSortField] = useState<keyof Member>('ordem');
@@ -883,15 +881,13 @@ export default function App() {
         const matchSearch = item.nome.toLowerCase().includes(searchLower) || 
                             item.matricula.includes(searchLower) || 
                             item.funcao.toLowerCase().includes(searchLower);
-        const matchPatente = filterPatente ? item.patente === filterPatente : true;
-        const matchFuncao = filterFuncao ? item.funcao === filterFuncao : true;
         
         let matchStatus = true;
         if (filterStatus === 'Ativo') matchStatus = item.status === 'Ativo';
         if (filterStatus === 'Férias') matchStatus = item.status === 'Férias';
         if (filterStatus === 'Afastados') matchStatus = item.status === 'Licença' || item.status === 'Afastado';
 
-        return matchSearch && matchPatente && matchFuncao && matchStatus;
+        return matchSearch && matchStatus;
       })
       .sort((a, b) => {
         const valA = a[sortField];
@@ -904,7 +900,7 @@ export default function App() {
         if (strA > strB) return sortAsc ? 1 : -1;
         return 0;
       });
-  }, [members, search, filterPatente, filterFuncao, filterStatus, sortField, sortAsc]);
+  }, [members, search, filterStatus, sortField, sortAsc]);
 
   const handleSort = (field: keyof Member) => {
     if (sortField === field) {
@@ -1432,8 +1428,8 @@ export default function App() {
                       <td className="px-4 py-3 border-b border-slate-100 font-medium text-slate-900">
                         {new Date(item.data).toLocaleDateString('pt-BR')} às {item.hora}
                       </td>
-                      <td className="px-4 py-3 border-b border-slate-100 text-slate-700">{item.local}</td>
-                      <td className="px-4 py-3 border-b border-slate-100 text-slate-700 font-mono">{item.processo}</td>
+                      <td className="px-4 py-3 border-b border-slate-100 text-slate-700 hidden md:table-cell">{item.local}</td>
+                      <td className="px-4 py-3 border-b border-slate-100 text-slate-700 font-mono hidden md:table-cell">{item.processo}</td>
                       <td className="px-4 py-3 border-b border-slate-100">
                         <div className="flex flex-col gap-1.5">
                           {item.policialIds && item.policialIds.length > 0 ? (
@@ -1467,7 +1463,7 @@ export default function App() {
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 border-b border-slate-100 text-center">
+                      <td className="px-4 py-3 border-b border-slate-100 text-center hidden md:table-cell">
                         {item.pdfs && item.pdfs.length > 0 ? (
                           <div className="flex items-center justify-center gap-1 flex-wrap">
                             {item.pdfs.map((pdf, idx) => (
@@ -1615,16 +1611,16 @@ export default function App() {
         if (!member) return null;
         return (
           <div className="bg-white flex-1 rounded-lg border border-slate-200 flex flex-col p-6 shadow-sm">
-            <div className="flex justify-between items-start mb-6 pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-4">
-                <label className="relative w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold cursor-pointer group overflow-hidden shrink-0">
+            <div className="flex justify-between items-start mb-6 pb-4 border-b border-slate-100 gap-4">
+              <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                <label className="relative w-12 h-12 md:w-16 md:h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg md:text-xl font-bold cursor-pointer group overflow-hidden shrink-0">
                   {member.photoUrl ? (
                     <img src={member.photoUrl} alt={member.nome} className="w-full h-full object-cover" />
                   ) : (
                     member.nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
                   )}
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <FileUp className="w-6 h-6 text-white" />
+                    <FileUp className="w-5 h-5 md:w-6 md:h-6 text-white" />
                   </div>
                   <input 
                     type="file" 
@@ -1633,9 +1629,9 @@ export default function App() {
                     onChange={(e) => handlePhotoUpload(e, member.id)}
                   />
                 </label>
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-900">{member.patente} {member.nome}</h2>
-                  <p className="text-slate-500">{member.guerra} | Matrícula: {member.matricula}</p>
+                <div className="min-w-0">
+                  <h2 className="text-lg md:text-2xl font-bold text-slate-900 truncate">{member.patente} {member.nome}</h2>
+                  <p className="text-xs md:text-base text-slate-500 truncate">{member.guerra} | Matrícula: {member.matricula}</p>
                 </div>
               </div>
               <button 
@@ -1886,7 +1882,7 @@ export default function App() {
                                             </div>
                                           </div>
                                         </div>
-                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                           <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Baixar">
                                             <Download className="w-4 h-4" />
                                           </a>
