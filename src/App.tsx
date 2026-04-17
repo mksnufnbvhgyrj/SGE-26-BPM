@@ -1328,51 +1328,51 @@ export default function App() {
 
         {/* Content Area */}
         {activeAdminTab === 'efetivo' && (
-          <div className="flex-1 flex flex-col p-4 md:p-6 overflow-hidden">
+          <div className="flex-1 flex flex-col p-2 sm:p-4 md:p-6 overflow-hidden">
             {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 shrink-0">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-2 md:mb-4 shrink-0">
         <button 
           onClick={() => setFilterStatus('')}
-          className={`bg-white p-3 md:p-5 rounded-lg shadow-sm border flex flex-col text-left transition-all ${filterStatus === '' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'}`}
+          className={`bg-white p-2 md:p-5 rounded-lg shadow-sm border flex flex-col text-left transition-all ${filterStatus === '' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'}`}
         >
-          <Users className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-slate-700" />
-          <div className="text-xl md:text-3xl font-bold text-slate-900">{stats.total}</div>
-          <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Efetivo Total</div>
+          <Users className="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-slate-700" />
+          <div className="text-lg md:text-3xl font-bold text-slate-900 leading-tight md:leading-normal">{stats.total}</div>
+          <div className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Efetivo Total</div>
         </button>
         <button 
           onClick={() => setFilterStatus('Ativo')}
-          className={`bg-white p-3 md:p-5 rounded-lg shadow-sm border-x border-t border-b-4 border-b-green-500 flex flex-col text-left transition-all ${filterStatus === 'Ativo' ? 'border-x-green-500 border-t-green-500 ring-2 ring-green-500/20 bg-green-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
+          className={`bg-white p-2 md:p-5 rounded-lg shadow-sm border-x border-t border-b-2 md:border-b-4 border-b-green-500 flex flex-col text-left transition-all ${filterStatus === 'Ativo' ? 'border-x-green-500 border-t-green-500 ring-2 ring-green-500/20 bg-green-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
         >
-          <CheckCircle className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-green-500" />
-          <div className="text-xl md:text-3xl font-bold text-green-600">{stats.active}</div>
-          <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Pronto Emprego</div>
+          <CheckCircle className="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-green-500" />
+          <div className="text-lg md:text-3xl font-bold text-green-600 leading-tight md:leading-normal">{stats.active}</div>
+          <div className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Pronto Emprego</div>
         </button>
         <button 
           onClick={() => setFilterStatus('Férias')}
-          className={`bg-white p-3 md:p-5 rounded-lg shadow-sm border-x border-t border-b-4 border-b-yellow-500 flex flex-col text-left transition-all ${filterStatus === 'Férias' ? 'border-x-yellow-500 border-t-yellow-500 ring-2 ring-yellow-500/20 bg-yellow-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
+          className={`bg-white p-2 md:p-5 rounded-lg shadow-sm border-x border-t border-b-2 md:border-b-4 border-b-yellow-500 flex flex-col text-left transition-all ${filterStatus === 'Férias' ? 'border-x-yellow-500 border-t-yellow-500 ring-2 ring-yellow-500/20 bg-yellow-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
         >
-          <Sun className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-yellow-500" />
-          <div className="text-xl md:text-3xl font-bold text-yellow-600">{stats.vacation}</div>
-          <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Férias</div>
+          <Sun className="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-yellow-500" />
+          <div className="text-lg md:text-3xl font-bold text-yellow-600 leading-tight md:leading-normal">{stats.vacation}</div>
+          <div className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Férias</div>
         </button>
         <button 
           onClick={() => setFilterStatus('Afastados')}
-          className={`bg-white p-3 md:p-5 rounded-lg shadow-sm border-x border-t border-b-4 border-b-red-500 flex flex-col text-left transition-all ${filterStatus === 'Afastados' ? 'border-x-red-500 border-t-red-500 ring-2 ring-red-500/20 bg-red-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
+          className={`bg-white p-2 md:p-5 rounded-lg shadow-sm border-x border-t border-b-2 md:border-b-4 border-b-red-500 flex flex-col text-left transition-all ${filterStatus === 'Afastados' ? 'border-x-red-500 border-t-red-500 ring-2 ring-red-500/20 bg-red-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
         >
-          <Activity className="w-5 h-5 md:w-7 md:h-7 mb-1 md:mb-2 text-red-500" />
-          <div className="text-xl md:text-3xl font-bold text-red-600">{stats.away}</div>
-          <div className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">LTS / Afastados</div>
+          <Activity className="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-red-500" />
+          <div className="text-lg md:text-3xl font-bold text-red-600 leading-tight md:leading-normal">{stats.away}</div>
+          <div className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">LTS / Afastados</div>
         </button>
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row gap-3 items-center mb-4 shrink-0">
+      <div className="bg-white p-2 sm:p-3 md:p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row gap-2 items-center mb-2 md:mb-4 shrink-0">
         <div className="relative flex-1 w-full md:w-auto">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-4 h-4 md:w-5 md:h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
             type="text" 
             placeholder="Buscar por nome, matrícula, função..." 
-            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full pl-9 pr-3 py-1.5 md:pl-10 md:pr-4 md:py-2 text-sm md:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -1388,20 +1388,20 @@ export default function App() {
           />
           <button 
             onClick={() => excelInputRef.current?.click()}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium transition-colors"
+            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium text-xs md:text-sm transition-colors"
             title="Importar de Planilha Excel"
           >
             <Upload className="w-4 h-4" /> Importar
           </button>
           <button 
             onClick={handleExportCSV}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium transition-colors"
+            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium text-xs md:text-sm transition-colors"
           >
             <Download className="w-4 h-4" /> Exportar
           </button>
           <button 
             onClick={() => openModal()}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
+            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-xs md:text-sm transition-colors"
           >
             <Plus className="w-4 h-4" /> Novo Membro
           </button>
@@ -1425,18 +1425,18 @@ export default function App() {
                   <th 
                     key={col.key}
                     onClick={() => handleSort(col.key as keyof Member)}
-                    className={`px-4 py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors ${col.hideOnMobile ? 'hidden md:table-cell' : ''}`}
+                    className={`px-2 py-2 md:px-4 md:py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors ${col.hideOnMobile ? 'hidden md:table-cell' : ''}`}
                   >
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 text-xs md:text-sm">
                       {col.label}
                       <ArrowUpDown className="w-3 h-3 opacity-50" />
                     </div>
                   </th>
                 ))}
-                <th className="px-4 py-3 text-center font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">
+                <th className="px-2 py-2 md:px-4 md:py-3 text-center font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 hidden md:table-cell text-xs md:text-sm">
                   Doc
                 </th>
-                <th className="px-4 py-3 text-right font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                <th className="px-2 py-2 md:px-4 md:py-3 text-right font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 text-xs md:text-sm">
                   Ações
                 </th>
               </tr>
@@ -1446,18 +1446,18 @@ export default function App() {
                 filteredAndSortedMembers.map((item) => (
                   <tr 
                     key={item.id} 
-                    className="hover:bg-slate-50 transition-colors group cursor-pointer"
+                    className="hover:bg-slate-50 transition-colors group cursor-pointer text-xs md:text-sm"
                     onClick={() => {
                       setSelectedFichaMemberId(item.id);
                       setActiveAdminTab('ficha_individual');
                     }}
                   >
-                    <td className="px-4 py-3 border-b border-slate-100 text-slate-500 font-mono hidden md:table-cell">#{item.ordem}</td>
-                    <td className="px-4 py-3 border-b border-slate-100 font-medium text-slate-900 hidden md:table-cell">{item.matricula}</td>
-                    <td className="px-4 py-3 border-b border-slate-100 text-slate-700">{item.patente}</td>
-                    <td className="px-4 py-3 border-b border-slate-100">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
+                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-slate-500 font-mono hidden md:table-cell">#{item.ordem}</td>
+                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 font-medium text-slate-900 hidden md:table-cell">{item.matricula}</td>
+                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-slate-700">{item.patente}</td>
+                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2 md:gap-3">
+                        <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] md:text-xs font-bold shrink-0 overflow-hidden">
                           {item.photoUrl ? (
                             <img src={item.photoUrl} alt={item.nome} className="w-full h-full object-cover" />
                           ) : (
@@ -1470,13 +1470,13 @@ export default function App() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 border-b border-slate-100 text-slate-700 hidden md:table-cell">{item.funcao}</td>
-                    <td className="px-4 py-3 border-b border-slate-100">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${getStatusClasses(item.status)}`}>
+                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-slate-700 hidden md:table-cell">{item.funcao}</td>
+                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100">
+                      <span className={`px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-[10px] md:text-xs font-semibold uppercase tracking-wide ${getStatusClasses(item.status)}`}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 border-b border-slate-100 text-center hidden md:table-cell">
+                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-center hidden md:table-cell">
                       {item.pdfUrl ? (
                         <a href={item.pdfUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title={item.pdfName}>
                           <FileText className="w-4 h-4" />
@@ -1485,7 +1485,7 @@ export default function App() {
                         <span className="text-slate-300">-</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 border-b border-slate-100 text-right">
+                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-right">
                       <button onClick={(e) => { e.stopPropagation(); openModal(item); }} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1">
                         <Edit2 className="w-4 h-4" />
                       </button>
