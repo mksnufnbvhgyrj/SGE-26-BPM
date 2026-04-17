@@ -189,7 +189,7 @@ const LoginScreen = ({ onLogin, members }: { onLogin: (auth: AuthState) => void,
                   value={matricula} onChange={e => setMatricula(e.target.value)}
                 />
               </div>
-              <button type="submit" className="w-full mt-2 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-medium transition-colors">
+              <button type="submit" className="w-full mt-2 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                 Entrar
               </button>
             </form>
@@ -211,7 +211,7 @@ const LoginScreen = ({ onLogin, members }: { onLogin: (auth: AuthState) => void,
                   value={adminPass} onChange={e => setAdminPass(e.target.value)}
                 />
               </div>
-              <button type="submit" className="w-full mt-2 bg-slate-800 text-white py-2 rounded-md hover:bg-slate-900 font-medium transition-colors">
+              <button type="submit" className="w-full mt-2 bg-slate-800 text-white py-2 rounded-md hover:bg-slate-900 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2">
                 Entrar como Admin
               </button>
             </form>
@@ -1242,7 +1242,7 @@ export default function App() {
           {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
         <div className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'px-6'} bg-slate-950 text-white font-bold text-lg gap-2 shrink-0 transition-all overflow-hidden whitespace-nowrap`}>
-          <span className="bg-blue-600 text-white px-2 py-1 rounded-md text-sm shrink-0">26º</span>
+          <span className="text-blue-800 bg-blue-100 px-2 py-0.5 rounded text-sm shrink-0 font-bold">26º</span>
           {!isSidebarCollapsed && <span>BPM SGE</span>}
         </div>
         <nav className="flex-1 py-4 flex flex-col gap-1 px-3 overflow-y-auto overflow-x-hidden">
@@ -1272,7 +1272,7 @@ export default function App() {
           <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-full" onClick={e => e.stopPropagation()}>
             <div className="h-16 flex items-center justify-between px-6 bg-slate-950 text-white font-bold text-lg shrink-0">
               <div className="flex items-center gap-2">
-                <span className="bg-blue-600 text-white px-2 py-1 rounded-md text-sm">26º BPM</span>
+                <span className="text-blue-800 bg-blue-100 px-2 py-0.5 rounded text-sm font-bold">26º BPM</span>
                 SGE
               </div>
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-slate-400 hover:text-white">
@@ -1388,20 +1388,20 @@ export default function App() {
           />
           <button 
             onClick={() => excelInputRef.current?.click()}
-            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium text-xs md:text-sm transition-colors"
+            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium text-xs md:text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             title="Importar de Planilha Excel"
           >
             <Upload className="w-4 h-4" /> Importar
           </button>
           <button 
             onClick={handleExportCSV}
-            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium text-xs md:text-sm transition-colors"
+            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium text-xs md:text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             <Download className="w-4 h-4" /> Exportar
           </button>
           <button 
             onClick={() => openModal()}
-            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-xs md:text-sm transition-colors"
+            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-xs md:text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             <Plus className="w-4 h-4" /> Novo Membro
           </button>
@@ -1489,8 +1489,8 @@ export default function App() {
                       <button onClick={(e) => { e.stopPropagation(); openModal(item); }} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1">
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
-                        <Trash2 className="w-4 h-4" />
+                      <button aria-label="Excluir item" onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2">
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
                       </button>
                     </td>
                   </tr>
@@ -1596,8 +1596,8 @@ export default function App() {
                         <button onClick={() => openAudienciaModal(item)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1">
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDeleteAudiencia(item.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
-                          <Trash2 className="w-4 h-4" />
+                        <button aria-label="Excluir item" onClick={() => handleDeleteAudiencia(item.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2">
+                          <Trash2 className="w-4 h-4" aria-hidden="true" />
                         </button>
                       </td>
                     </tr>
@@ -1621,11 +1621,74 @@ export default function App() {
   )}
 
   {activeAdminTab === 'configuracoes' && (
-    <div className="flex-1 overflow-auto p-4 md:p-6">
-      <div className="bg-white p-8 rounded-lg border border-slate-200 text-center text-slate-500 flex flex-col items-center justify-center h-64">
-        <Settings className="w-12 h-12 text-slate-300 mb-4" />
-        <h3 className="text-lg font-medium text-slate-900 mb-1">Configurações do Sistema</h3>
-        <p>As configurações avançadas do sistema serão disponibilizadas em breve.</p>
+    <div className="flex-1 overflow-auto p-4 md:p-6 bg-slate-50">
+      
+      {/* Implementação do Padrão do Usuário: Tipografia Básica e Hierarquia */}
+      <div className="max-w-4xl mx-auto space-y-8 text-left">
+        
+        {/* Style Guide Canvas */}
+        <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
+          <div className="mb-8 border-b border-slate-100 pb-4">
+            <span className="text-blue-800 bg-blue-100 px-3 py-1 rounded-full text-sm font-medium mb-4 inline-block">
+              Guia de Estilos / Style Guide
+            </span>
+            <p className="text-gray-600">
+              Padrões visuais, hierarquia de texto e tokens de design adotados pelo sistema.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            
+            {/* Hierarquia solicitada */}
+            <div className="p-6 bg-slate-50 rounded-lg border border-slate-100">
+              <span className="text-xs font-mono text-slate-400 uppercase tracking-widest mb-4 block">Hierarquia de Títulos (H1, H2, H3)</span>
+              <div className="space-y-4">
+                
+                <h1 className="text-2xl font-bold text-slate-900 border-l-4 border-blue-600 pl-3">
+                  Dashboard
+                </h1>
+                
+                <div className="pl-4 space-y-4">
+                  <h2 className="text-xl font-semibold text-slate-800">
+                    Resumo
+                  </h2>
+                  
+                  <div className="pl-4">
+                    <h3 className="text-lg font-medium text-slate-700">
+                      Detalhes
+                    </h3>
+                    <p className="text-gray-600 mt-2 text-sm max-w-lg">
+                      O uso das tags semânticas corretas e tamanhos progressivos (`text-2xl`, `text-xl`, `text-lg`) garante acessibilidade e organização da informação na tela.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Design Tokens Extras */}
+            <div className="p-6 bg-slate-50 rounded-lg border border-slate-100">
+              <span className="text-xs font-mono text-slate-400 uppercase tracking-widest mb-4 block">Design Tokens Individuais</span>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-medium text-slate-900 mb-2">Badge Secundário</h4>
+                  <span className="text-blue-800 bg-blue-100 px-2.5 py-0.5 rounded-full text-sm font-medium">
+                    Badge
+                  </span>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-slate-900 mb-2">Texto Secundário Padrão</h4>
+                  <p className="text-gray-600">
+                    Texto secundário
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
   )}
@@ -1921,7 +1984,7 @@ export default function App() {
                         </button>
                         <button 
                           onClick={handleSaveFicha}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                         >
                           <CheckCircle className="w-4 h-4" /> Salvar Alterações
                         </button>
@@ -2001,8 +2064,8 @@ export default function App() {
                                           <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Baixar">
                                             <Download className="w-4 h-4" />
                                           </a>
-                                          <button onClick={() => handleRemoveAnexo(anexo.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Remover">
-                                            <Trash2 className="w-4 h-4" />
+                                          <button aria-label="Excluir item" onClick={() => handleRemoveAnexo(anexo.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" title="Remover">
+                                            <Trash2 className="w-4 h-4" aria-hidden="true" />
                                           </button>
                                         </div>
                                       </div>
@@ -2097,13 +2160,22 @@ export default function App() {
 {/* Modal Audiência */}
       {isAudienciaModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-300">
+          <div 
+            className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-300"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-audiencia-title"
+          >
             <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center shrink-0">
-              <h3 className="text-lg font-bold text-slate-900">
+              <h3 id="modal-audiencia-title" className="text-lg font-bold text-slate-900">
                 {editingAudienciaId ? 'Editar Audiência' : 'Agendar Nova Audiência'}
               </h3>
-              <button onClick={closeAudienciaModal} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors">
-                <X className="w-5 h-5" />
+              <button 
+                onClick={closeAudienciaModal} 
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
+                aria-label="Fechar"
+              >
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
             
@@ -2111,39 +2183,43 @@ export default function App() {
               <div className="p-6 overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-slate-700">Data *</label>
+                    <label htmlFor="aud-data" className="text-sm font-medium text-slate-700">Data *</label>
                     <input 
+                      id="aud-data"
                       type="date" required
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={audienciaFormData.data || ''} onChange={e => setAudienciaFormData({...audienciaFormData, data: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-slate-700">Hora *</label>
+                    <label htmlFor="aud-hora" className="text-sm font-medium text-slate-700">Hora *</label>
                     <input 
+                      id="aud-hora"
                       type="time" required
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={audienciaFormData.hora || ''} onChange={e => setAudienciaFormData({...audienciaFormData, hora: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">Local (Vara/Fórum) *</label>
+                    <label htmlFor="aud-local" className="text-sm font-medium text-slate-700">Local (Vara/Fórum) *</label>
                     <input 
+                      id="aud-local"
                       type="text" required placeholder="Ex: 1ª Vara Criminal da Comarca..."
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={audienciaFormData.local || ''} onChange={e => setAudienciaFormData({...audienciaFormData, local: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">Número do Processo *</label>
+                    <label htmlFor="aud-processo" className="text-sm font-medium text-slate-700">Número do Processo *</label>
                     <input 
+                      id="aud-processo"
                       type="text" required placeholder="Ex: 0001234-56.2026.8.19.0001"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono text-sm"
                       value={audienciaFormData.processo || ''} onChange={e => setAudienciaFormData({...audienciaFormData, processo: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">Policiais Convocados *</label>
+                    <label htmlFor="aud-policias" className="text-sm font-medium text-slate-700">Policiais Convocados *</label>
                     
                     {audienciaFormData.policialIds && audienciaFormData.policialIds.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-1">
@@ -2207,8 +2283,8 @@ export default function App() {
                                 <FileText className="w-5 h-5 text-red-500 shrink-0" />
                                 <span className="text-sm text-slate-700 truncate">{pdf.name}</span>
                               </div>
-                              <button type="button" onClick={() => handleRemoveAudienciaPdf(pdf.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors shrink-0" title="Remover PDF">
-                                <Trash2 className="w-4 h-4" />
+                              <button type="button" aria-label="Excluir item" onClick={() => handleRemoveAudienciaPdf(pdf.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" title="Remover PDF">
+                                <Trash2 className="w-4 h-4" aria-hidden="true" />
                               </button>
                             </div>
                           ))}
@@ -2229,10 +2305,10 @@ export default function App() {
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 shrink-0">
-                <button type="button" onClick={closeAudienciaModal} className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 rounded-md transition-colors">
+                <button type="button" onClick={closeAudienciaModal} className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2">
                   Cancelar
                 </button>
-                <button type="submit" className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors shadow-sm">
+                <button type="submit" className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                   Salvar Audiência
                 </button>
               </div>
@@ -2242,13 +2318,22 @@ export default function App() {
       )}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-300">
+          <div 
+            className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-300"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-militar-title"
+          >
             <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center shrink-0">
-              <h3 className="text-lg font-bold text-slate-900">
+              <h3 id="modal-militar-title" className="text-lg font-bold text-slate-900">
                 {editingId ? 'Editar Militar' : 'Adicionar Novo Militar'}
               </h3>
-              <button onClick={closeModal} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors">
-                <X className="w-5 h-5" />
+              <button 
+                onClick={closeModal} 
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
+                aria-label="Fechar"
+              >
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
             
@@ -2256,24 +2341,27 @@ export default function App() {
               <div className="p-6 overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-slate-700">Matrícula *</label>
+                    <label htmlFor="militar-mat" className="text-sm font-medium text-slate-700">Matrícula *</label>
                     <input 
+                      id="militar-mat"
                       type="text" required placeholder="Ex: 123.456-7"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.matricula || ''} onChange={e => setFormData({...formData, matricula: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-slate-700">CPF *</label>
+                    <label htmlFor="militar-cpf" className="text-sm font-medium text-slate-700">CPF *</label>
                     <input 
+                      id="militar-cpf"
                       type="text" required placeholder="Ex: 111.111.111-11"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.cpf || ''} onChange={e => setFormData({...formData, cpf: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">Patente *</label>
+                    <label htmlFor="militar-pat" className="text-sm font-medium text-slate-700">Patente *</label>
                     <select 
+                      id="militar-pat"
                       required
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
                       value={formData.patente || ''} onChange={e => setFormData({...formData, patente: e.target.value})}
@@ -2283,24 +2371,27 @@ export default function App() {
                     </select>
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">Nome Completo *</label>
+                    <label htmlFor="militar-nome" className="text-sm font-medium text-slate-700">Nome Completo *</label>
                     <input 
+                      id="militar-nome"
                       type="text" required placeholder="Nome completo do policial"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.nome || ''} onChange={e => setFormData({...formData, nome: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-slate-700">Nome de Guerra</label>
+                    <label htmlFor="militar-guerra" className="text-sm font-medium text-slate-700">Nome de Guerra</label>
                     <input 
+                      id="militar-guerra"
                       type="text" placeholder="Nome na tarjeta"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.guerra || ''} onChange={e => setFormData({...formData, guerra: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-slate-700">Função</label>
+                    <label htmlFor="militar-funcao" className="text-sm font-medium text-slate-700">Função</label>
                     <input 
+                      id="militar-funcao"
                       type="text" list="funcoesList" placeholder="Ex: Patrulha"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.funcao || ''} onChange={e => setFormData({...formData, funcao: e.target.value})}
@@ -2310,24 +2401,27 @@ export default function App() {
                     </datalist>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-slate-700">Telefone</label>
+                    <label htmlFor="militar-tel" className="text-sm font-medium text-slate-700">Telefone</label>
                     <input 
+                      id="militar-tel"
                       type="tel" placeholder="(21) 90000-0000"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.telefone || ''} onChange={e => setFormData({...formData, telefone: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-slate-700">Email</label>
+                    <label htmlFor="militar-email" className="text-sm font-medium text-slate-700">Email</label>
                     <input 
+                      id="militar-email"
                       type="email" placeholder="email@exemplo.com"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">Status Operacional</label>
+                    <label htmlFor="militar-status" className="text-sm font-medium text-slate-700">Status Operacional</label>
                     <select 
+                      id="militar-status"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
                       value={formData.status || 'Ativo'} onChange={e => setFormData({...formData, status: e.target.value as Status})}
                     >
@@ -2338,8 +2432,9 @@ export default function App() {
                     </select>
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">Documento Anexo (PDF)</label>
+                    <label htmlFor="militar-pdf" className="text-sm font-medium text-slate-700">Documento Anexo (PDF)</label>
                     <input 
+                      id="militar-pdf"
                       type="file" accept=".pdf"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                       onChange={e => {
@@ -2371,10 +2466,10 @@ export default function App() {
                 </div>
               </div>
               <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3 shrink-0 rounded-b-xl">
-                <button type="button" onClick={closeModal} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-100 font-medium transition-colors">
+                <button type="button" onClick={closeModal} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-100 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2">
                   Cancelar
                 </button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors">
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                   Salvar Registro
                 </button>
               </div>
