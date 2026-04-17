@@ -140,25 +140,24 @@ const LoginScreen = ({ onLogin, members }: { onLogin: (auth: AuthState) => void,
 
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded border border-slate-300 w-full max-w-md overflow-hidden relative">
-        <div className="absolute top-0 left-0 w-full h-1 bg-slate-900"></div>
-        <div className="bg-slate-50 p-8 text-center border-b border-slate-200">
-          <h1 className="text-3xl font-bold font-serif text-slate-900 flex items-center justify-center gap-3">
-            <span className="bg-slate-900 text-white px-3 py-1 rounded text-xs font-sans tracking-widest uppercase">26º BPM</span>
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+        <div className="bg-blue-600 p-6 text-center">
+          <h1 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
+            <span className="bg-white text-blue-600 px-2 py-1 rounded-md text-sm">26º BPM</span>
             SGE
           </h1>
-          <p className="text-slate-500 mt-3 text-sm font-sans uppercase tracking-widest">Sistema de Gestão de Efetivo</p>
+          <p className="text-blue-100 mt-2 text-sm">Sistema de Gestão de Efetivo</p>
         </div>
         
-        <div className="flex border-b border-slate-200 bg-white">
+        <div className="flex border-b border-slate-200">
           <button 
-            className={`flex-1 py-4 text-xs tracking-wider uppercase font-bold transition-colors ${loginType === 'USER' ? 'border-b-2 border-slate-900 text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`flex-1 py-3 text-sm font-medium transition-colors ${loginType === 'USER' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
             onClick={() => { setLoginType('USER'); setError(''); }}
           >
             Acesso Individual
           </button>
           <button 
-            className={`flex-1 py-4 text-xs tracking-wider uppercase font-bold transition-colors ${loginType === 'ADMIN' ? 'border-b-2 border-slate-900 text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`flex-1 py-3 text-sm font-medium transition-colors ${loginType === 'ADMIN' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
             onClick={() => { setLoginType('ADMIN'); setError(''); }}
           >
             Administrador
@@ -482,12 +481,12 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
           </div>
 
           {/* Right Column: Profile Info (ID Card Style) */}
-          <div className="bg-white rounded-md border border-slate-300 overflow-hidden order-1 lg:order-2 sticky top-6">
-            <div className="h-24 bg-slate-900 relative overflow-hidden flex items-center px-6">
-              <div className="absolute inset-0 opacity-10 mix-blend-overlay border-b border-slate-700"></div>
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden order-1 lg:order-2 sticky top-6">
+            <div className="h-24 bg-slate-800 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
             </div>
             <div className="px-6 pb-6 relative">
-              <div className="w-24 h-24 rounded border-4 border-white bg-slate-100 absolute -top-12 shadow-sm overflow-hidden flex items-center justify-center text-3xl font-bold text-slate-400">
+              <div className="w-24 h-24 rounded-2xl border-4 border-white bg-slate-100 absolute -top-12 shadow-md overflow-hidden flex items-center justify-center text-3xl font-bold text-slate-400">
                 {user.photoUrl ? (
                   <img src={user.photoUrl} alt={user.nome} className="w-full h-full object-cover" />
                 ) : (
@@ -1225,16 +1224,16 @@ export default function App() {
   return (
     <div className="flex h-screen w-full bg-slate-100 overflow-hidden font-sans text-slate-900">
       {/* Sidebar (Desktop) */}
-      <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} transition-all duration-300 bg-slate-900 border-r border-slate-800 text-slate-300 flex flex-col shrink-0 hidden md:flex relative`}>
+      <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} transition-all duration-300 bg-slate-900 text-slate-300 flex flex-col shrink-0 hidden md:flex relative`}>
         <button 
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          className="absolute -right-3 top-5 bg-slate-800 text-slate-300 hover:text-white rounded-full p-1 border border-slate-700 z-10 shadow-sm"
+          className="absolute -right-3 top-5 bg-slate-800 text-slate-300 hover:text-white rounded-full p-1 border border-slate-700 z-10"
         >
           {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
-        <div className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'px-6'} border-b border-slate-800 font-serif font-bold text-lg gap-2 shrink-0 transition-all overflow-hidden whitespace-nowrap`}>
-          <span className="bg-slate-100 text-slate-900 px-2 py-1 rounded text-sm shrink-0 tracking-widest font-sans">26º</span>
-          {!isSidebarCollapsed && <span className="text-white tracking-widest uppercase text-sm">BPM SGE</span>}
+        <div className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'px-6'} bg-slate-950 text-white font-bold text-lg gap-2 shrink-0 transition-all overflow-hidden whitespace-nowrap`}>
+          <span className="bg-blue-600 text-white px-2 py-1 rounded-md text-sm shrink-0">26º</span>
+          {!isSidebarCollapsed && <span>BPM SGE</span>}
         </div>
         <nav className="flex-1 py-4 flex flex-col gap-1 px-3 overflow-y-auto overflow-x-hidden">
           <button onClick={() => setActiveAdminTab('efetivo')} className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2.5 rounded-md transition-colors ${activeAdminTab === 'efetivo' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 hover:text-white'}`} title="Efetivo">
@@ -1259,12 +1258,12 @@ export default function App() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 z-40 md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}>
-          <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800" onClick={e => e.stopPropagation()}>
-            <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800 font-serif font-bold text-lg shrink-0">
+        <div className="fixed inset-0 bg-slate-900/60 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+          <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-full" onClick={e => e.stopPropagation()}>
+            <div className="h-16 flex items-center justify-between px-6 bg-slate-950 text-white font-bold text-lg shrink-0">
               <div className="flex items-center gap-2">
-                <span className="bg-slate-100 text-slate-900 px-2 py-1 rounded text-sm shrink-0 tracking-widest font-sans">26º</span>
-                <span className="text-white tracking-widest uppercase text-sm">BPM SGE</span>
+                <span className="bg-blue-600 text-white px-2 py-1 rounded-md text-sm">26º BPM</span>
+                SGE
               </div>
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
@@ -1296,13 +1295,12 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-slate-100">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-300 flex items-center justify-between px-4 md:px-6 shrink-0 relative">
-          <div className="absolute bottom-0 left-0 w-full h-0.5 bg-slate-900"></div>
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0">
           <div className="flex items-center gap-3">
             <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-md shrink-0">
               <Menu className="w-5 h-5" />
             </button>
-            <h2 className="text-lg md:text-xl font-bold text-slate-900 truncate font-serif tracking-wide uppercase">
+            <h2 className="text-lg md:text-xl font-bold text-slate-800 truncate">
               {activeAdminTab === 'efetivo' && 'Controle de Efetivo'}
               {activeAdminTab === 'audiencias' && 'Gestão de Audiências'}
               {activeAdminTab === 'administrativo' && 'Módulo Administrativo'}
