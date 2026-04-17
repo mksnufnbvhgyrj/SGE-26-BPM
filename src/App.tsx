@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase } from './lib/supabase';
-import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, BarChart3, FileUp, Settings, LogOut, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, Bell, FileSpreadsheet, File, Upload, UploadCloud, Phone, Mail } from 'lucide-react';
+import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, FileUp, Settings, LogOut, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, Bell, FileSpreadsheet, File, Upload, UploadCloud, Phone, Mail } from 'lucide-react';
 
 type Status = 'Ativo' | 'Férias' | 'Licença' | 'Afastado';
 
@@ -174,16 +174,18 @@ const LoginScreen = ({ onLogin, members }: { onLogin: (auth: AuthState) => void,
           {loginType === 'USER' ? (
             <form onSubmit={handleUserLogin} className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">CPF</label>
+                <label htmlFor="login-cpf" className="block text-sm font-medium text-slate-700 mb-1">CPF</label>
                 <input 
+                  id="login-cpf"
                   type="text" required placeholder="Ex: 111.111.111-11"
                   className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   value={cpf} onChange={e => setCpf(e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Matrícula</label>
+                <label htmlFor="login-mat" className="block text-sm font-medium text-slate-700 mb-1">Matrícula</label>
                 <input 
+                  id="login-mat"
                   type="text" required placeholder="Ex: 50.123-4"
                   className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   value={matricula} onChange={e => setMatricula(e.target.value)}
@@ -196,16 +198,18 @@ const LoginScreen = ({ onLogin, members }: { onLogin: (auth: AuthState) => void,
           ) : (
             <form onSubmit={handleAdminLogin} className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Usuário</label>
+                <label htmlFor="admin-usr" className="block text-sm font-medium text-slate-700 mb-1">Usuário</label>
                 <input 
+                  id="admin-usr"
                   type="text" required placeholder="admin"
                   className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   value={adminUser} onChange={e => setAdminUser(e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Senha</label>
+                <label htmlFor="admin-pwd" className="block text-sm font-medium text-slate-700 mb-1">Senha</label>
                 <input 
+                  id="admin-pwd"
                   type="password" required placeholder="admin"
                   className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   value={adminPass} onChange={e => setAdminPass(e.target.value)}
@@ -682,7 +686,7 @@ export default function App() {
   const [isDraggingAnexo, setIsDraggingAnexo] = useState(false);
 
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'danger' } | null>(null);
-  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const excelInputRef = useRef<HTMLInputElement>(null);
 
   const showToast = (message: string, type: 'success' | 'danger' = 'success') => {
@@ -697,6 +701,7 @@ export default function App() {
     if (activeFichaSection === 'Dados Principais' && selectedFichaMemberId) {
       const member = members.find(m => m.id === selectedFichaMemberId);
       if (member) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFichaFormData({
           guerra: member.guerra || '',
           patente: member.patente || '',
@@ -726,8 +731,9 @@ export default function App() {
 
   const handleSaveFicha = () => {
     if (selectedFichaMemberId) {
+      const currentMs = new Date().getTime();
       const newNotification: Notification = {
-        id: Date.now().toString(),
+        id: currentMs.toString(),
         message: 'Sua ficha individual (Dados Principais) foi atualizada pelo administrador.',
         date: new Date().toISOString(),
         read: false
@@ -765,7 +771,7 @@ export default function App() {
             reader.onloadend = () => {
               const base64String = reader.result as string;
               resolve({
-                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                id: crypto.randomUUID(),
                 name: file.name,
                 url: base64String,
                 type: file.type || 'application/octet-stream',
@@ -779,8 +785,9 @@ export default function App() {
         })
       );
 
+      const currentMs = new Date().getTime();
       const newNotification: Notification = {
-        id: Date.now().toString(),
+        id: currentMs.toString(),
         message: 'Novos anexos foram adicionados à sua ficha.',
         date: new Date().toISOString(),
         read: false
@@ -846,7 +853,7 @@ export default function App() {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         const newNotification: Notification = {
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           message: 'Sua foto de perfil foi atualizada.',
           date: new Date().toISOString(),
           read: false
@@ -862,7 +869,6 @@ export default function App() {
     }
   };
 
-  const uniquePatentes = useMemo(() => [...new Set(members.map(m => m.patente))].sort(), [members]);
   const uniqueFuncoes = useMemo(() => [...new Set(members.map(m => m.funcao))].sort(), [members]);
 
   const filteredFichaMembers = useMemo(() => {
@@ -902,7 +908,7 @@ export default function App() {
         if (strA > strB) return sortAsc ? 1 : -1;
         return 0;
       });
-  }, [members, search, filterStatus, sortField, sortAsc]);
+  }, [members, debouncedSearch, filterStatus, sortField, sortAsc]);
 
   const handleSort = (field: keyof Member) => {
     if (sortField === field) {
@@ -934,6 +940,7 @@ export default function App() {
         const currentMaxId = members.length > 0 ? Math.max(...members.map(m => m.id)) : 0;
         let nextIdForNew = currentMaxId + 1;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const importedMembers: Member[] = data.map((row: any) => {
           const findKey = (candidates: string[]) => {
             const key = Object.keys(row).find(k => 
@@ -1042,9 +1049,10 @@ export default function App() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    const currentMs = new Date().getTime();
     if (editingId) {
       const newNotification: Notification = {
-        id: Date.now().toString(),
+        id: currentMs.toString(),
         message: 'Suas informações funcionais foram atualizadas pelo administrador.',
         date: new Date().toISOString(),
         read: false
@@ -1054,7 +1062,7 @@ export default function App() {
     } else {
       const newMember = {
         ...formData,
-        id: Date.now(),
+        id: currentMs,
         ordem: members.length + 1,
       } as Member;
       setMembers([...members, newMember]);
@@ -1098,13 +1106,14 @@ export default function App() {
       showToast('Selecione pelo menos um policial convocado.', 'danger');
       return;
     }
+    const currentMs = new Date().getTime();
     if (editingAudienciaId) {
       setAudiencias(audiencias.map(a => a.id === editingAudienciaId ? { ...a, ...audienciaFormData } as Audiencia : a));
       showToast('Audiência atualizada com sucesso!');
     } else {
       const newAudiencia = {
         ...audienciaFormData,
-        id: Date.now(),
+        id: currentMs,
       } as Audiencia;
       setAudiencias([...audiencias, newAudiencia]);
       showToast('Nova audiência adicionada!', 'success');
@@ -1268,8 +1277,8 @@ export default function App() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
-          <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-full" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-slate-900/60 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)} onKeyDown={(e) => { if(e.key === 'Enter' || e.key === ' ') setIsMobileMenuOpen(false); }} role="button" tabIndex={0} aria-label="Fechar menu" >
+          <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-full" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="presentation">
             <div className="h-16 flex items-center justify-between px-6 bg-slate-950 text-white font-bold text-lg shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-blue-800 bg-blue-100 px-2 py-0.5 rounded text-sm font-bold">26º BPM</span>
@@ -1847,28 +1856,28 @@ export default function App() {
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Nome de Guerra</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.guerra || ''} onChange={(e) => setFichaFormData({...fichaFormData, guerra: e.target.value})} />
+                            <label htmlFor="ficha-guerra" className="block text-xs font-medium text-slate-500 mb-1">Nome de Guerra</label>
+                            <input id="ficha-guerra" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.guerra || ''} onChange={(e) => setFichaFormData({...fichaFormData, guerra: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Quadro</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="Ex: QOPM" value={fichaFormData.quadro || ''} onChange={(e) => setFichaFormData({...fichaFormData, quadro: e.target.value})} />
+                            <label htmlFor="ficha-quadro" className="block text-xs font-medium text-slate-500 mb-1">Quadro</label>
+                            <input id="ficha-quadro" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="Ex: QOPM" value={fichaFormData.quadro || ''} onChange={(e) => setFichaFormData({...fichaFormData, quadro: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Posto/Grad.</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.patente || ''} onChange={(e) => setFichaFormData({...fichaFormData, patente: e.target.value})} />
+                            <label htmlFor="ficha-patente" className="block text-xs font-medium text-slate-500 mb-1">Posto/Grad.</label>
+                            <input id="ficha-patente" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.patente || ''} onChange={(e) => setFichaFormData({...fichaFormData, patente: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">RG Militar</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="000.000" value={fichaFormData.rgMilitar || ''} onChange={(e) => setFichaFormData({...fichaFormData, rgMilitar: e.target.value})} />
+                            <label htmlFor="ficha-rgmilitar" className="block text-xs font-medium text-slate-500 mb-1">RG Militar</label>
+                            <input id="ficha-rgmilitar" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="000.000" value={fichaFormData.rgMilitar || ''} onChange={(e) => setFichaFormData({...fichaFormData, rgMilitar: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Data de Emissão</label>
-                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataEmissaoRg || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataEmissaoRg: e.target.value})} />
+                            <label htmlFor="ficha-dt-rg" className="block text-xs font-medium text-slate-500 mb-1">Data de Emissão</label>
+                            <input id="ficha-dt-rg" type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataEmissaoRg || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataEmissaoRg: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Comportamento</label>
-                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.comportamento || 'Bom'} onChange={(e) => setFichaFormData({...fichaFormData, comportamento: e.target.value})}>
+                            <label htmlFor="ficha-comp" className="block text-xs font-medium text-slate-500 mb-1">Comportamento</label>
+                            <select id="ficha-comp" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.comportamento || 'Bom'} onChange={(e) => setFichaFormData({...fichaFormData, comportamento: e.target.value})}>
                               <option value="Excepcional">Excepcional</option>
                               <option value="Ótimo">Ótimo</option>
                               <option value="Bom">Bom</option>
@@ -1886,55 +1895,55 @@ export default function App() {
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div className="lg:col-span-2">
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Nome Completo</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.nome || ''} onChange={(e) => setFichaFormData({...fichaFormData, nome: e.target.value})} />
+                            <label htmlFor="ficha-nome" className="block text-xs font-medium text-slate-500 mb-1">Nome Completo</label>
+                            <input id="ficha-nome" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.nome || ''} onChange={(e) => setFichaFormData({...fichaFormData, nome: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">CPF</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="000.000.000-00" value={fichaFormData.cpf || ''} onChange={(e) => setFichaFormData({...fichaFormData, cpf: e.target.value})} />
+                            <label htmlFor="ficha-cpf" className="block text-xs font-medium text-slate-500 mb-1">CPF</label>
+                            <input id="ficha-cpf" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="000.000.000-00" value={fichaFormData.cpf || ''} onChange={(e) => setFichaFormData({...fichaFormData, cpf: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Matrícula</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.matricula || ''} onChange={(e) => setFichaFormData({...fichaFormData, matricula: e.target.value})} />
+                            <label htmlFor="ficha-matricula" className="block text-xs font-medium text-slate-500 mb-1">Matrícula</label>
+                            <input id="ficha-matricula" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.matricula || ''} onChange={(e) => setFichaFormData({...fichaFormData, matricula: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Vínculo</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="Efetivo" value={fichaFormData.vinculo || ''} onChange={(e) => setFichaFormData({...fichaFormData, vinculo: e.target.value})} />
+                            <label htmlFor="ficha-vinculo" className="block text-xs font-medium text-slate-500 mb-1">Vínculo</label>
+                            <input id="ficha-vinculo" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="Efetivo" value={fichaFormData.vinculo || ''} onChange={(e) => setFichaFormData({...fichaFormData, vinculo: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Data de Nascimento</label>
-                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataNascimento: e.target.value})} />
+                            <label htmlFor="ficha-dt-nasc" className="block text-xs font-medium text-slate-500 mb-1">Data de Nascimento</label>
+                            <input id="ficha-dt-nasc" type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataNascimento: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Cidade de Nascimento</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.cidadeNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, cidadeNascimento: e.target.value})} />
+                            <label htmlFor="ficha-cidade-nasc" className="block text-xs font-medium text-slate-500 mb-1">Cidade de Nascimento</label>
+                            <input id="ficha-cidade-nasc" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.cidadeNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, cidadeNascimento: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">UF Nascimento</label>
-                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.ufNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, ufNascimento: e.target.value})}>
+                            <label htmlFor="ficha-uf" className="block text-xs font-medium text-slate-500 mb-1">UF Nascimento</label>
+                            <select id="ficha-uf" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.ufNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, ufNascimento: e.target.value})}>
                               <option value="">Selecione...</option>
                               <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
                             </select>
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">PASEP</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.pasep || ''} onChange={(e) => setFichaFormData({...fichaFormData, pasep: e.target.value})} />
+                            <label htmlFor="ficha-pasep" className="block text-xs font-medium text-slate-500 mb-1">PASEP</label>
+                            <input id="ficha-pasep" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.pasep || ''} onChange={(e) => setFichaFormData({...fichaFormData, pasep: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Reg. Civil</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.regCivil || ''} onChange={(e) => setFichaFormData({...fichaFormData, regCivil: e.target.value})} />
+                            <label htmlFor="ficha-reg-civil" className="block text-xs font-medium text-slate-500 mb-1">Reg. Civil</label>
+                            <input id="ficha-reg-civil" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.regCivil || ''} onChange={(e) => setFichaFormData({...fichaFormData, regCivil: e.target.value})} />
                           </div>
                           <div className="lg:col-span-2">
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Pai</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.pai || ''} onChange={(e) => setFichaFormData({...fichaFormData, pai: e.target.value})} />
+                            <label htmlFor="ficha-pai" className="block text-xs font-medium text-slate-500 mb-1">Pai</label>
+                            <input id="ficha-pai" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.pai || ''} onChange={(e) => setFichaFormData({...fichaFormData, pai: e.target.value})} />
                           </div>
                           <div className="lg:col-span-2">
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Mãe</label>
-                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.mae || ''} onChange={(e) => setFichaFormData({...fichaFormData, mae: e.target.value})} />
+                            <label htmlFor="ficha-mae" className="block text-xs font-medium text-slate-500 mb-1">Mãe</label>
+                            <input id="ficha-mae" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.mae || ''} onChange={(e) => setFichaFormData({...fichaFormData, mae: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Tipo Sanguíneo</label>
-                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.tipoSanguineo || ''} onChange={(e) => setFichaFormData({...fichaFormData, tipoSanguineo: e.target.value})}>
+                            <label htmlFor="ficha-sangue" className="block text-xs font-medium text-slate-500 mb-1">Tipo Sanguíneo</label>
+                            <select id="ficha-sangue" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.tipoSanguineo || ''} onChange={(e) => setFichaFormData({...fichaFormData, tipoSanguineo: e.target.value})}>
                               <option value="">Selecione...</option>
                               <option value="A">A</option>
                               <option value="B">B</option>
@@ -1943,8 +1952,8 @@ export default function App() {
                             </select>
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Fator RH</label>
-                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.fatorRh || ''} onChange={(e) => setFichaFormData({...fichaFormData, fatorRh: e.target.value})}>
+                            <label htmlFor="ficha-fator-rh" className="block text-xs font-medium text-slate-500 mb-1">Fator RH</label>
+                            <select id="ficha-fator-rh" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.fatorRh || ''} onChange={(e) => setFichaFormData({...fichaFormData, fatorRh: e.target.value})}>
                               <option value="">Selecione...</option>
                               <option value="+">Positivo (+)</option>
                               <option value="-">Negativo (-)</option>
@@ -1960,12 +1969,12 @@ export default function App() {
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Data Inclusão</label>
-                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataInclusao || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataInclusao: e.target.value})} />
+                            <label htmlFor="ficha-dt-inc" className="block text-xs font-medium text-slate-500 mb-1">Data Inclusão</label>
+                            <input id="ficha-dt-inc" type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataInclusao || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataInclusao: e.target.value})} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Situação</label>
-                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.status || 'Ativo'} onChange={(e) => setFichaFormData({...fichaFormData, status: e.target.value})}>
+                            <label htmlFor="ficha-status" className="block text-xs font-medium text-slate-500 mb-1">Situação</label>
+                            <select id="ficha-status" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.status || 'Ativo'} onChange={(e) => setFichaFormData({...fichaFormData, status: e.target.value})}>
                               <option value="Ativo">Ativo</option>
                               <option value="Férias">Férias</option>
                               <option value="Licença">Licença</option>
@@ -2064,6 +2073,7 @@ export default function App() {
                                           <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Baixar">
                                             <Download className="w-4 h-4" />
                                           </a>
+                                          {/* eslint-disable-next-line react-hooks/refs */}
                                           <button aria-label="Excluir item" onClick={() => handleRemoveAnexo(anexo.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" title="Remover">
                                             <Trash2 className="w-4 h-4" aria-hidden="true" />
                                           </button>
@@ -2253,8 +2263,9 @@ export default function App() {
                     )}
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-slate-700">Status *</label>
+                    <label htmlFor="aud-status" className="text-sm font-medium text-slate-700">Status *</label>
                     <select 
+                      id="aud-status"
                       required
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={audienciaFormData.status || 'Agendada'} onChange={e => setAudienciaFormData({...audienciaFormData, status: e.target.value as Audiencia['status']})}
@@ -2265,16 +2276,17 @@ export default function App() {
                     </select>
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">Observações</label>
+                    <label htmlFor="aud-obs" className="text-sm font-medium text-slate-700">Observações</label>
                     <textarea 
+                      id="aud-obs"
                       rows={3} placeholder="Informações adicionais..."
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
                       value={audienciaFormData.observacoes || ''} onChange={e => setAudienciaFormData({...audienciaFormData, observacoes: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">Documentos Anexos (PDFs)</label>
-                    <div className="flex flex-col gap-3">
+                    <span className="text-sm font-medium text-slate-700" id="docs-label">Documentos Anexos (PDFs)</span>
+                    <div className="flex flex-col gap-3" aria-labelledby="docs-label">
                       {audienciaFormData.pdfs && audienciaFormData.pdfs.length > 0 && (
                         <div className="flex flex-col gap-2">
                           {audienciaFormData.pdfs.map(pdf => (
