@@ -596,31 +596,30 @@ export default function App() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { data, error } = await supabase.from('app_store').select('*');
-        if (error) {
-          console.error('Error loading from Supabase:', error);
-          return;
-        }
+        // Tenta ler das tabelas relacionais do Supabase
+        const { data: membrosData, error: errMembros } = await supabase.from('membros').select('*').order('ordem', { ascending: true });
+        const { data: audienciasData, error: errAudiencias } = await supabase.from('audiencias').select('*');
         
-        if (data && data.length > 0) {
-          const membersData = data.find(d => d.key === 'members');
-          const audienciasData = data.find(d => d.key === 'audiencias');
-          
-          if (membersData && membersData.value) {
-            setMembers(membersData.value);
-          }
-          if (audienciasData && audienciasData.value) {
-            setAudiencias(audienciasData.value);
-          }
+        if (!errMembros && membrosData && membrosData.length > 0) {
+          setMembers(membrosData);
         } else {
-          // Initialize Supabase with default data if empty
-          await supabase.from('app_store').upsert([
-            { key: 'members', value: INITIAL_DATA },
-            { key: 'audiencias', value: INITIAL_AUDIENCIAS }
-          ]);
+          // Fallback na falta da tabela: tenta ler do modelo velho app_store para não quebrar a tela
+          const { data } = await supabase.from('app_store').select('*');
+          const memFallback = data?.find(d => d.key === 'members');
+          if (memFallback) setMembers(memFallback.value);
         }
+
+        if (!errAudiencias && audienciasData && audienciasData.length > 0) {
+          setAudiencias(audienciasData);
+        } else {
+          // Fallback na falta da tabela
+          const { data } = await supabase.from('app_store').select('*');
+          const audFallback = data?.find(d => d.key === 'audiencias');
+          if (audFallback) setAudiencias(audFallback.value);
+        }
+
       } catch (err) {
-        console.error('Failed to load data:', err);
+        console.error('Falha ao carregar dados do Supabase:', err);
       } finally {
         setIsLoadingData(false);
       }
@@ -629,20 +628,21 @@ export default function App() {
     loadData();
   }, []);
 
-  // Sync members to Supabase when changed (debounced)
+  // Sincroniza membros alterados localmente para a tabela real 'membros' do postgres
   useEffect(() => {
-    if (isLoadingData) return;
+    if (isLoadingData || members.length === 0) return;
     const timeoutId = setTimeout(async () => {
-      await supabase.from('app_store').upsert({ key: 'members', value: members });
+      // Como estamos passando uma Array de objetos, o Supabase trata de Inserir os novos e Atualizar os antigos baseado na PK (id)
+      await supabase.from('membros').upsert(members, { onConflict: 'id' });
     }, 1000);
     return () => clearTimeout(timeoutId);
   }, [members, isLoadingData]);
 
-  // Sync audiencias to Supabase when changed (debounced)
+  // Sincroniza audiencias alteradas localmente para a tabela real 'audiencias' do postgres
   useEffect(() => {
-    if (isLoadingData) return;
+    if (isLoadingData || audiencias.length === 0) return;
     const timeoutId = setTimeout(async () => {
-      await supabase.from('app_store').upsert({ key: 'audiencias', value: audiencias });
+      await supabase.from('audiencias').upsert(audiencias, { onConflict: 'id' });
     }, 1000);
     return () => clearTimeout(timeoutId);
   }, [audiencias, isLoadingData]);
@@ -1063,10 +1063,15 @@ export default function App() {
     closeModal();
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm('Tem certeza que deseja remover este registro?')) {
       setMembers(members.filter(m => m.id !== id));
       showToast('Registro removido.', 'danger');
+      try {
+        await supabase.from('membros').delete().eq('id', id);
+      } catch (err) {
+        console.error('Erro ao excluir membro do supabase', err);
+      }
     }
   };
 
@@ -1161,10 +1166,15 @@ export default function App() {
     });
   };
 
-  const handleDeleteAudiencia = (id: number) => {
+  const handleDeleteAudiencia = async (id: number) => {
     if (window.confirm('Tem certeza que deseja remover esta audiência?')) {
       setAudiencias(audiencias.filter(a => a.id !== id));
       showToast('Audiência removida.', 'danger');
+      try {
+        await supabase.from('audiencias').delete().eq('id', id);
+      } catch (err) {
+        console.error('Erro ao excluir audiência do supabase', err);
+      }
     }
   };
 
