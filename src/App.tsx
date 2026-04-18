@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import * as XLSX from 'xlsx';
 import { supabase } from './lib/supabase';
-import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, FileUp, Settings, LogOut, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, Bell, FileSpreadsheet, File, Upload, UploadCloud, Phone, Mail } from 'lucide-react';
+import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, BarChart3, FileUp, Settings, LogOut, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, Bell, FileSpreadsheet, File, Upload, UploadCloud, Phone, Mail } from 'lucide-react';
 
 type Status = 'Ativo' | 'Férias' | 'Licença' | 'Afastado';
 
@@ -174,48 +173,44 @@ const LoginScreen = ({ onLogin, members }: { onLogin: (auth: AuthState) => void,
           {loginType === 'USER' ? (
             <form onSubmit={handleUserLogin} className="flex flex-col gap-4">
               <div>
-                <label htmlFor="login-cpf" className="block text-sm font-medium text-slate-700 mb-1">CPF</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">CPF</label>
                 <input 
-                  id="login-cpf"
                   type="text" required placeholder="Ex: 111.111.111-11"
                   className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   value={cpf} onChange={e => setCpf(e.target.value)}
                 />
               </div>
               <div>
-                <label htmlFor="login-mat" className="block text-sm font-medium text-slate-700 mb-1">Matrícula</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Matrícula</label>
                 <input 
-                  id="login-mat"
                   type="text" required placeholder="Ex: 50.123-4"
                   className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   value={matricula} onChange={e => setMatricula(e.target.value)}
                 />
               </div>
-              <button type="submit" className="w-full mt-2 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+              <button type="submit" className="w-full mt-2 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-medium transition-colors">
                 Entrar
               </button>
             </form>
           ) : (
             <form onSubmit={handleAdminLogin} className="flex flex-col gap-4">
               <div>
-                <label htmlFor="admin-usr" className="block text-sm font-medium text-slate-700 mb-1">Usuário</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Usuário</label>
                 <input 
-                  id="admin-usr"
                   type="text" required placeholder="admin"
                   className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   value={adminUser} onChange={e => setAdminUser(e.target.value)}
                 />
               </div>
               <div>
-                <label htmlFor="admin-pwd" className="block text-sm font-medium text-slate-700 mb-1">Senha</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Senha</label>
                 <input 
-                  id="admin-pwd"
                   type="password" required placeholder="admin"
                   className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   value={adminPass} onChange={e => setAdminPass(e.target.value)}
                 />
               </div>
-              <button type="submit" className="w-full mt-2 bg-slate-800 text-white py-2 rounded-md hover:bg-slate-900 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2">
+              <button type="submit" className="w-full mt-2 bg-slate-800 text-white py-2 rounded-md hover:bg-slate-900 font-medium transition-colors">
                 Entrar como Admin
               </button>
             </form>
@@ -278,7 +273,7 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
             </button>
             
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-[320px] bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
                 <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                   <h4 className="font-semibold text-slate-800">Notificações</h4>
                   {unreadCount > 0 && <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{unreadCount} novas</span>}
@@ -373,10 +368,10 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
                     <thead className="bg-slate-50 text-slate-500">
                       <tr>
                         <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Data/Hora</th>
-                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Local</th>
-                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Processo</th>
+                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Local</th>
+                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Processo</th>
                         <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Status</th>
-                        <th className="px-5 py-3 text-center font-semibold uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Doc</th>
+                        <th className="px-5 py-3 text-center font-semibold uppercase tracking-wider border-b border-slate-200">Doc</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -385,8 +380,8 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
                           <td className="px-5 py-4 font-medium text-slate-900 whitespace-nowrap">
                             {new Date(item.data).toLocaleDateString('pt-BR')} <span className="text-slate-400 font-normal">às</span> {item.hora}
                           </td>
-                          <td className="px-5 py-4 text-slate-700 hidden md:table-cell">{item.local}</td>
-                          <td className="px-5 py-4 text-slate-700 font-mono text-xs hidden md:table-cell">{item.processo}</td>
+                          <td className="px-5 py-4 text-slate-700">{item.local}</td>
+                          <td className="px-5 py-4 text-slate-700 font-mono text-xs">{item.processo}</td>
                           <td className="px-5 py-4">
                             <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${
                               item.status === 'Agendada' ? 'bg-blue-100 text-blue-700' :
@@ -396,7 +391,7 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
                               {item.status}
                             </span>
                           </td>
-                          <td className="px-5 py-4 text-center hidden md:table-cell">
+                          <td className="px-5 py-4 text-center">
                             {item.pdfs && item.pdfs.length > 0 ? (
                               <div className="flex items-center justify-center gap-1 flex-wrap">
                                 {item.pdfs.map((pdf, idx) => (
@@ -462,7 +457,7 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity pl-2">
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pl-2">
                             <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Baixar">
                               <Download className="w-4 h-4" />
                             </a>
@@ -600,30 +595,31 @@ export default function App() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Tenta ler das tabelas relacionais do Supabase
-        const { data: membrosData, error: errMembros } = await supabase.from('membros').select('*').order('ordem', { ascending: true });
-        const { data: audienciasData, error: errAudiencias } = await supabase.from('audiencias').select('*');
+        const { data, error } = await supabase.from('app_store').select('*');
+        if (error) {
+          console.error('Error loading from Supabase:', error);
+          return;
+        }
         
-        if (!errMembros && membrosData && membrosData.length > 0) {
-          setMembers(membrosData);
+        if (data && data.length > 0) {
+          const membersData = data.find(d => d.key === 'members');
+          const audienciasData = data.find(d => d.key === 'audiencias');
+          
+          if (membersData && membersData.value) {
+            setMembers(membersData.value);
+          }
+          if (audienciasData && audienciasData.value) {
+            setAudiencias(audienciasData.value);
+          }
         } else {
-          // Fallback na falta da tabela: tenta ler do modelo velho app_store para não quebrar a tela
-          const { data } = await supabase.from('app_store').select('*');
-          const memFallback = data?.find(d => d.key === 'members');
-          if (memFallback) setMembers(memFallback.value);
+          // Initialize Supabase with default data if empty
+          await supabase.from('app_store').upsert([
+            { key: 'members', value: INITIAL_DATA },
+            { key: 'audiencias', value: INITIAL_AUDIENCIAS }
+          ]);
         }
-
-        if (!errAudiencias && audienciasData && audienciasData.length > 0) {
-          setAudiencias(audienciasData);
-        } else {
-          // Fallback na falta da tabela
-          const { data } = await supabase.from('app_store').select('*');
-          const audFallback = data?.find(d => d.key === 'audiencias');
-          if (audFallback) setAudiencias(audFallback.value);
-        }
-
       } catch (err) {
-        console.error('Falha ao carregar dados do Supabase:', err);
+        console.error('Failed to load data:', err);
       } finally {
         setIsLoadingData(false);
       }
@@ -632,34 +628,27 @@ export default function App() {
     loadData();
   }, []);
 
-  // Sincroniza membros alterados localmente para a tabela real 'membros' do postgres
+  // Sync members to Supabase when changed
   useEffect(() => {
-    if (isLoadingData || members.length === 0) return;
-    const timeoutId = setTimeout(async () => {
-      // Como estamos passando uma Array de objetos, o Supabase trata de Inserir os novos e Atualizar os antigos baseado na PK (id)
-      await supabase.from('membros').upsert(members, { onConflict: 'id' });
-    }, 1000);
-    return () => clearTimeout(timeoutId);
+    if (isLoadingData) return;
+    const syncMembers = async () => {
+      await supabase.from('app_store').upsert({ key: 'members', value: members });
+    };
+    syncMembers();
   }, [members, isLoadingData]);
 
-  // Sincroniza audiencias alteradas localmente para a tabela real 'audiencias' do postgres
+  // Sync audiencias to Supabase when changed
   useEffect(() => {
-    if (isLoadingData || audiencias.length === 0) return;
-    const timeoutId = setTimeout(async () => {
-      await supabase.from('audiencias').upsert(audiencias, { onConflict: 'id' });
-    }, 1000);
-    return () => clearTimeout(timeoutId);
+    if (isLoadingData) return;
+    const syncAudiencias = async () => {
+      await supabase.from('app_store').upsert({ key: 'audiencias', value: audiencias });
+    };
+    syncAudiencias();
   }, [audiencias, isLoadingData]);
 
   const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 300);
-    return () => clearTimeout(timer);
-  }, [search]);
-
-  const [filterStatus, setFilterStatus] = useState('');
+  const [filterPatente, setFilterPatente] = useState('');
+  const [filterFuncao, setFilterFuncao] = useState('');
   
   const [sortField, setSortField] = useState<keyof Member>('ordem');
   const [sortAsc, setSortAsc] = useState(true);
@@ -673,21 +662,13 @@ export default function App() {
   const [audienciaFormData, setAudienciaFormData] = useState<Partial<Audiencia>>({ status: 'Agendada' });
   
   const [fichaSearch, setFichaSearch] = useState('');
-  const [debouncedFichaSearch, setDebouncedFichaSearch] = useState('');
-  
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedFichaSearch(fichaSearch), 300);
-    return () => clearTimeout(timer);
-  }, [fichaSearch]);
-
   const [selectedFichaMemberId, setSelectedFichaMemberId] = useState<number | null>(null);
   const [activeFichaSection, setActiveFichaSection] = useState<string | null>(null);
-  const [fichaFormData, setFichaFormData] = useState<Partial<Member>>({});
+  const [fichaFormData, setFichaFormData] = useState<any>({});
   const [isDraggingAnexo, setIsDraggingAnexo] = useState(false);
 
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'danger' } | null>(null);
-  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const excelInputRef = useRef<HTMLInputElement>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const showToast = (message: string, type: 'success' | 'danger' = 'success') => {
     setToast({ message, type });
@@ -701,7 +682,6 @@ export default function App() {
     if (activeFichaSection === 'Dados Principais' && selectedFichaMemberId) {
       const member = members.find(m => m.id === selectedFichaMemberId);
       if (member) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFichaFormData({
           guerra: member.guerra || '',
           patente: member.patente || '',
@@ -731,9 +711,8 @@ export default function App() {
 
   const handleSaveFicha = () => {
     if (selectedFichaMemberId) {
-      const currentMs = new Date().getTime();
       const newNotification: Notification = {
-        id: currentMs.toString(),
+        id: Date.now().toString(),
         message: 'Sua ficha individual (Dados Principais) foi atualizada pelo administrador.',
         date: new Date().toISOString(),
         read: false
@@ -747,7 +726,7 @@ export default function App() {
     }
   };
 
-  const processAnexoFiles = async (files: FileList | File[]) => {
+  const processAnexoFiles = (files: FileList | File[]) => {
     if (!selectedFichaMemberId) return;
     const member = members.find(m => m.id === selectedFichaMemberId);
     if (!member) return;
@@ -763,50 +742,45 @@ export default function App() {
 
     if (validFiles.length === 0) return;
 
-    try {
-      const newAnexos = await Promise.all(
-        validFiles.map((file: File) => {
-          return new Promise<Anexo>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const base64String = reader.result as string;
-              resolve({
-                id: crypto.randomUUID(),
-                name: file.name,
-                url: base64String,
-                type: file.type || 'application/octet-stream',
-                date: new Date().toISOString(),
-                size: file.size
-              });
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
-        })
-      );
+    const newAnexos: Anexo[] = [];
+    let processedFiles = 0;
 
-      const currentMs = new Date().getTime();
-      const newNotification: Notification = {
-        id: currentMs.toString(),
-        message: 'Novos anexos foram adicionados à sua ficha.',
-        date: new Date().toISOString(),
-        read: false
+    validFiles.forEach((file: File) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        newAnexos.push({
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          name: file.name,
+          url: base64String,
+          type: file.type || 'application/octet-stream',
+          date: new Date().toISOString(),
+          size: file.size
+        });
+
+        processedFiles++;
+        if (processedFiles === validFiles.length) {
+          const newNotification: Notification = {
+            id: Date.now().toString(),
+            message: 'Novos anexos foram adicionados à sua ficha.',
+            date: new Date().toISOString(),
+            read: false
+          };
+          
+          setMembers(prevMembers => prevMembers.map(m => 
+            m.id === selectedFichaMemberId 
+              ? { 
+                  ...m, 
+                  anexos: [...(m.anexos || []), ...newAnexos],
+                  notifications: [newNotification, ...(m.notifications || [])]
+                } 
+              : m
+          ));
+          showToast('Anexos importados com sucesso!', 'success');
+        }
       };
-      
-      setMembers(prevMembers => prevMembers.map(m => 
-        m.id === selectedFichaMemberId 
-          ? { 
-              ...m, 
-              anexos: [...(m.anexos || []), ...newAnexos],
-              notifications: [newNotification, ...(m.notifications || [])]
-            } 
-          : m
-      ));
-      showToast('Anexos importados com sucesso!', 'success');
-    } catch (error) {
-      console.error('Erro ao processar anexos:', error);
-      showToast('Ocorreu um erro ao processar os arquivos.', 'danger');
-    }
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleUploadAnexo = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -853,7 +827,7 @@ export default function App() {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         const newNotification: Notification = {
-          id: crypto.randomUUID(),
+          id: Date.now().toString(),
           message: 'Sua foto de perfil foi atualizada.',
           date: new Date().toISOString(),
           read: false
@@ -869,33 +843,30 @@ export default function App() {
     }
   };
 
+  const uniquePatentes = useMemo(() => [...new Set(members.map(m => m.patente))].sort(), [members]);
   const uniqueFuncoes = useMemo(() => [...new Set(members.map(m => m.funcao))].sort(), [members]);
 
   const filteredFichaMembers = useMemo(() => {
-    if (!debouncedFichaSearch.trim()) return [];
+    if (!fichaSearch.trim()) return [];
     
-    const searchLower = debouncedFichaSearch.toLowerCase();
+    const searchLower = fichaSearch.toLowerCase();
     return members.filter(item => 
       item.nome.toLowerCase().includes(searchLower) || 
       item.matricula.includes(searchLower) || 
       item.id.toString() === searchLower
     );
-  }, [members, debouncedFichaSearch]);
+  }, [members, fichaSearch]);
 
   const filteredAndSortedMembers = useMemo(() => {
     return members
       .filter(item => {
-        const searchLower = debouncedSearch.toLowerCase();
+        const searchLower = search.toLowerCase();
         const matchSearch = item.nome.toLowerCase().includes(searchLower) || 
                             item.matricula.includes(searchLower) || 
                             item.funcao.toLowerCase().includes(searchLower);
-        
-        let matchStatus = true;
-        if (filterStatus === 'Ativo') matchStatus = item.status === 'Ativo';
-        if (filterStatus === 'Férias') matchStatus = item.status === 'Férias';
-        if (filterStatus === 'Afastados') matchStatus = item.status === 'Licença' || item.status === 'Afastado';
-
-        return matchSearch && matchStatus;
+        const matchPatente = filterPatente ? item.patente === filterPatente : true;
+        const matchFuncao = filterFuncao ? item.funcao === filterFuncao : true;
+        return matchSearch && matchPatente && matchFuncao;
       })
       .sort((a, b) => {
         const valA = a[sortField];
@@ -908,7 +879,7 @@ export default function App() {
         if (strA > strB) return sortAsc ? 1 : -1;
         return 0;
       });
-  }, [members, debouncedSearch, filterStatus, sortField, sortAsc]);
+  }, [members, search, filterPatente, filterFuncao, sortField, sortAsc]);
 
   const handleSort = (field: keyof Member) => {
     if (sortField === field) {
@@ -917,96 +888,6 @@ export default function App() {
       setSortField(field);
       setSortAsc(true);
     }
-  };
-
-  const handleImportExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      try {
-        const bstr = evt.target?.result;
-        const wb = XLSX.read(bstr, { type: 'binary' });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws);
-
-        if (data.length === 0) {
-          showToast('A planilha parece estar vazia.', 'danger');
-          return;
-        }
-
-        const currentMaxId = members.length > 0 ? Math.max(...members.map(m => m.id)) : 0;
-        let nextIdForNew = currentMaxId + 1;
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const importedMembers: Member[] = data.map((row: any) => {
-          const findKey = (candidates: string[]) => {
-            const key = Object.keys(row).find(k => 
-              candidates.some(c => k.toLowerCase().trim().includes(c.toLowerCase()))
-            );
-            return key ? row[key] : undefined;
-          };
-
-          const statusRaw = findKey(['status', 'situação', 'situacao', 'estado']) || 'Ativo';
-          let status: Status = 'Ativo';
-          const sLower = String(statusRaw).toLowerCase();
-          if (['férias', 'ferias', 'vacation'].some(s => sLower.includes(s))) status = 'Férias';
-          else if (['licença', 'licenca', 'lts'].some(s => sLower.includes(s))) status = 'Licença';
-          else if (['afastado', 'away'].some(s => sLower.includes(s))) status = 'Afastado';
-
-          return {
-            id: 0, // Temporary
-            ordem: Number(findKey(['ordem', 'nº', 'posicao', 'posição'])) || 0,
-            matricula: String(findKey(['matricula', 'matrícula', 'id', 'registro']) || '').trim(),
-            cpf: String(findKey(['cpf', 'documento']) || '').trim(),
-            patente: String(findKey(['patente', 'grad', 'graduação', 'graduacao', 'posto']) || '').trim(),
-            nome: String(findKey(['nome', 'nome completo', 'policial']) || '').trim(),
-            guerra: String(findKey(['guerra', 'nome de guerra', 'conhecido']) || '').trim(),
-            funcao: String(findKey(['funcao', 'função', 'cargo', 'atribuição']) || '').trim(),
-            telefone: String(findKey(['telefone', 'celular', 'contato']) || '').trim(),
-            email: String(findKey(['email', 'e-mail', 'correio']) || '').trim(),
-            status: status
-          };
-        });
-
-        const updatedMembers = [...members];
-        let importedCount = 0;
-        let updatedCount = 0;
-
-        importedMembers.forEach(newM => {
-          if (!newM.nome || newM.nome === 'undefined' || newM.nome === '') return;
-          
-          const existingIndex = updatedMembers.findIndex(m => 
-            (newM.matricula && m.matricula === newM.matricula) || 
-            (newM.cpf && m.cpf === newM.cpf)
-          );
-
-          if (existingIndex >= 0) {
-            updatedMembers[existingIndex] = { 
-              ...updatedMembers[existingIndex], 
-              ...newM, 
-              id: updatedMembers[existingIndex].id,
-              ordem: newM.ordem || updatedMembers[existingIndex].ordem
-            };
-            updatedCount++;
-          } else {
-            updatedMembers.push({ ...newM, id: nextIdForNew++ });
-            importedCount++;
-          }
-        });
-
-        setMembers(updatedMembers.sort((a, b) => a.ordem - b.ordem));
-        showToast(`${importedCount} novos membros importados e ${updatedCount} atualizados.`, 'success');
-        
-        if (excelInputRef.current) excelInputRef.current.value = '';
-      } catch (err) {
-        console.error('Erro ao importar Excel:', err);
-        showToast('Erro ao processar o arquivo Excel.', 'danger');
-      }
-    };
-    reader.readAsBinaryString(file);
   };
 
   const handleExportCSV = () => {
@@ -1049,10 +930,9 @@ export default function App() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const currentMs = new Date().getTime();
     if (editingId) {
       const newNotification: Notification = {
-        id: currentMs.toString(),
+        id: Date.now().toString(),
         message: 'Suas informações funcionais foram atualizadas pelo administrador.',
         date: new Date().toISOString(),
         read: false
@@ -1062,7 +942,7 @@ export default function App() {
     } else {
       const newMember = {
         ...formData,
-        id: currentMs,
+        id: Date.now(),
         ordem: members.length + 1,
       } as Member;
       setMembers([...members, newMember]);
@@ -1071,15 +951,10 @@ export default function App() {
     closeModal();
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = (id: number) => {
     if (window.confirm('Tem certeza que deseja remover este registro?')) {
       setMembers(members.filter(m => m.id !== id));
       showToast('Registro removido.', 'danger');
-      try {
-        await supabase.from('membros').delete().eq('id', id);
-      } catch (err) {
-        console.error('Erro ao excluir membro do supabase', err);
-      }
     }
   };
 
@@ -1106,14 +981,13 @@ export default function App() {
       showToast('Selecione pelo menos um policial convocado.', 'danger');
       return;
     }
-    const currentMs = new Date().getTime();
     if (editingAudienciaId) {
       setAudiencias(audiencias.map(a => a.id === editingAudienciaId ? { ...a, ...audienciaFormData } as Audiencia : a));
       showToast('Audiência atualizada com sucesso!');
     } else {
       const newAudiencia = {
         ...audienciaFormData,
-        id: currentMs,
+        id: Date.now(),
       } as Audiencia;
       setAudiencias([...audiencias, newAudiencia]);
       showToast('Nova audiência adicionada!', 'success');
@@ -1175,15 +1049,10 @@ export default function App() {
     });
   };
 
-  const handleDeleteAudiencia = async (id: number) => {
+  const handleDeleteAudiencia = (id: number) => {
     if (window.confirm('Tem certeza que deseja remover esta audiência?')) {
       setAudiencias(audiencias.filter(a => a.id !== id));
       showToast('Audiência removida.', 'danger');
-      try {
-        await supabase.from('audiencias').delete().eq('id', id);
-      } catch (err) {
-        console.error('Erro ao excluir audiência do supabase', err);
-      }
     }
   };
 
@@ -1251,7 +1120,7 @@ export default function App() {
           {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
         <div className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'px-6'} bg-slate-950 text-white font-bold text-lg gap-2 shrink-0 transition-all overflow-hidden whitespace-nowrap`}>
-          <span className="text-blue-800 bg-blue-100 px-2 py-0.5 rounded text-sm shrink-0 font-bold">26º</span>
+          <span className="bg-blue-600 text-white px-2 py-1 rounded-md text-sm shrink-0">26º</span>
           {!isSidebarCollapsed && <span>BPM SGE</span>}
         </div>
         <nav className="flex-1 py-4 flex flex-col gap-1 px-3 overflow-y-auto overflow-x-hidden">
@@ -1277,11 +1146,11 @@ export default function App() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)} onKeyDown={(e) => { if(e.key === 'Enter' || e.key === ' ') setIsMobileMenuOpen(false); }} role="button" tabIndex={0} aria-label="Fechar menu" >
-          <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-full" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="presentation">
+        <div className="fixed inset-0 bg-slate-900/60 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+          <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-full" onClick={e => e.stopPropagation()}>
             <div className="h-16 flex items-center justify-between px-6 bg-slate-950 text-white font-bold text-lg shrink-0">
               <div className="flex items-center gap-2">
-                <span className="text-blue-800 bg-blue-100 px-2 py-0.5 rounded text-sm font-bold">26º BPM</span>
+                <span className="bg-blue-600 text-white px-2 py-1 rounded-md text-sm">26º BPM</span>
                 SGE
               </div>
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-slate-400 hover:text-white">
@@ -1316,10 +1185,10 @@ export default function App() {
         {/* Top Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0">
           <div className="flex items-center gap-3">
-            <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-md shrink-0">
+            <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-md">
               <Menu className="w-5 h-5" />
             </button>
-            <h2 className="text-lg md:text-xl font-bold text-slate-800 truncate">
+            <h2 className="text-xl font-bold text-slate-800 hidden sm:block">
               {activeAdminTab === 'efetivo' && 'Controle de Efetivo'}
               {activeAdminTab === 'audiencias' && 'Gestão de Audiências'}
               {activeAdminTab === 'administrativo' && 'Módulo Administrativo'}
@@ -1337,80 +1206,54 @@ export default function App() {
 
         {/* Content Area */}
         {activeAdminTab === 'efetivo' && (
-          <div className="flex-1 flex flex-col p-2 sm:p-4 md:p-6 overflow-hidden">
+          <div className="flex-1 flex flex-col p-4 md:p-6 overflow-hidden">
             {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-2 md:mb-4 shrink-0">
-        <button 
-          onClick={() => setFilterStatus('')}
-          className={`bg-white p-2 md:p-5 rounded-lg shadow-sm border flex flex-col text-left transition-all ${filterStatus === '' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'}`}
-        >
-          <Users className="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-slate-700" />
-          <div className="text-lg md:text-3xl font-bold text-slate-900 leading-tight md:leading-normal">{stats.total}</div>
-          <div className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Efetivo Total</div>
-        </button>
-        <button 
-          onClick={() => setFilterStatus('Ativo')}
-          className={`bg-white p-2 md:p-5 rounded-lg shadow-sm border-x border-t border-b-2 md:border-b-4 border-b-green-500 flex flex-col text-left transition-all ${filterStatus === 'Ativo' ? 'border-x-green-500 border-t-green-500 ring-2 ring-green-500/20 bg-green-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
-        >
-          <CheckCircle className="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-green-500" />
-          <div className="text-lg md:text-3xl font-bold text-green-600 leading-tight md:leading-normal">{stats.active}</div>
-          <div className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Pronto Emprego</div>
-        </button>
-        <button 
-          onClick={() => setFilterStatus('Férias')}
-          className={`bg-white p-2 md:p-5 rounded-lg shadow-sm border-x border-t border-b-2 md:border-b-4 border-b-yellow-500 flex flex-col text-left transition-all ${filterStatus === 'Férias' ? 'border-x-yellow-500 border-t-yellow-500 ring-2 ring-yellow-500/20 bg-yellow-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
-        >
-          <Sun className="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-yellow-500" />
-          <div className="text-lg md:text-3xl font-bold text-yellow-600 leading-tight md:leading-normal">{stats.vacation}</div>
-          <div className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Férias</div>
-        </button>
-        <button 
-          onClick={() => setFilterStatus('Afastados')}
-          className={`bg-white p-2 md:p-5 rounded-lg shadow-sm border-x border-t border-b-2 md:border-b-4 border-b-red-500 flex flex-col text-left transition-all ${filterStatus === 'Afastados' ? 'border-x-red-500 border-t-red-500 ring-2 ring-red-500/20 bg-red-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}`}
-        >
-          <Activity className="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-red-500" />
-          <div className="text-lg md:text-3xl font-bold text-red-600 leading-tight md:leading-normal">{stats.away}</div>
-          <div className="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">LTS / Afastados</div>
-        </button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 shrink-0">
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col">
+          <Users className="w-7 h-7 mb-2 text-slate-700" />
+          <div className="text-3xl font-bold text-slate-900">{stats.total}</div>
+          <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Efetivo Total</div>
+        </div>
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-green-500 flex flex-col">
+          <CheckCircle className="w-7 h-7 mb-2 text-green-500" />
+          <div className="text-3xl font-bold text-green-600">{stats.active}</div>
+          <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Pronto Emprego</div>
+        </div>
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-yellow-500 flex flex-col">
+          <Sun className="w-7 h-7 mb-2 text-yellow-500" />
+          <div className="text-3xl font-bold text-yellow-600">{stats.vacation}</div>
+          <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">Férias</div>
+        </div>
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200 border-b-4 border-b-red-500 flex flex-col">
+          <Activity className="w-7 h-7 mb-2 text-red-500" />
+          <div className="text-3xl font-bold text-red-600">{stats.away}</div>
+          <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mt-1">LTS / Afastados</div>
+        </div>
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white p-2 sm:p-3 md:p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row gap-2 items-center mb-2 md:mb-4 shrink-0">
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row gap-3 items-center mb-4 shrink-0">
         <div className="relative flex-1 w-full md:w-auto">
-          <Search className="w-4 h-4 md:w-5 md:h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
             type="text" 
             placeholder="Buscar por nome, matrícula, função..." 
-            className="w-full pl-9 pr-3 py-1.5 md:pl-10 md:pr-4 md:py-2 text-sm md:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
         <div className="flex gap-2 w-full md:w-auto">
-          <input 
-            type="file" 
-            ref={excelInputRef} 
-            onChange={handleImportExcel} 
-            accept=".xlsx, .xls" 
-            className="hidden" 
-          />
-          <button 
-            onClick={() => excelInputRef.current?.click()}
-            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium text-xs md:text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-            title="Importar de Planilha Excel"
-          >
-            <Upload className="w-4 h-4" /> Importar
-          </button>
           <button 
             onClick={handleExportCSV}
-            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium text-xs md:text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium transition-colors"
           >
             <Download className="w-4 h-4" /> Exportar
           </button>
           <button 
             onClick={() => openModal()}
-            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-xs md:text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
           >
             <Plus className="w-4 h-4" /> Novo Membro
           </button>
@@ -1424,28 +1267,28 @@ export default function App() {
             <thead className="bg-slate-50 sticky top-0 z-10">
               <tr>
                 {[
-                  { key: 'ordem', label: 'Ordem', hideOnMobile: true },
-                  { key: 'matricula', label: 'Matrícula', hideOnMobile: true },
-                  { key: 'patente', label: 'Patente', hideOnMobile: false },
-                  { key: 'nome', label: 'Nome', hideOnMobile: false },
-                  { key: 'funcao', label: 'Função', hideOnMobile: true },
-                  { key: 'status', label: 'Status', hideOnMobile: false }
+                  { key: 'ordem', label: 'Ordem' },
+                  { key: 'matricula', label: 'Matrícula' },
+                  { key: 'patente', label: 'Patente' },
+                  { key: 'nome', label: 'Nome' },
+                  { key: 'funcao', label: 'Função' },
+                  { key: 'status', label: 'Status' }
                 ].map((col) => (
                   <th 
                     key={col.key}
                     onClick={() => handleSort(col.key as keyof Member)}
-                    className={`px-2 py-2 md:px-4 md:py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors ${col.hideOnMobile ? 'hidden md:table-cell' : ''}`}
+                    className="px-4 py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors"
                   >
-                    <div className="flex items-center gap-1 text-xs md:text-sm">
+                    <div className="flex items-center gap-1">
                       {col.label}
                       <ArrowUpDown className="w-3 h-3 opacity-50" />
                     </div>
                   </th>
                 ))}
-                <th className="px-2 py-2 md:px-4 md:py-3 text-center font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 hidden md:table-cell text-xs md:text-sm">
+                <th className="px-4 py-3 text-center font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
                   Doc
                 </th>
-                <th className="px-2 py-2 md:px-4 md:py-3 text-right font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 text-xs md:text-sm">
+                <th className="px-4 py-3 text-right font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
                   Ações
                 </th>
               </tr>
@@ -1455,18 +1298,18 @@ export default function App() {
                 filteredAndSortedMembers.map((item) => (
                   <tr 
                     key={item.id} 
-                    className="hover:bg-slate-50 transition-colors group cursor-pointer text-xs md:text-sm"
+                    className="hover:bg-slate-50 transition-colors group cursor-pointer"
                     onClick={() => {
                       setSelectedFichaMemberId(item.id);
                       setActiveAdminTab('ficha_individual');
                     }}
                   >
-                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-slate-500 font-mono hidden md:table-cell">#{item.ordem}</td>
-                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 font-medium text-slate-900 hidden md:table-cell">{item.matricula}</td>
-                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-slate-700">{item.patente}</td>
-                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100">
-                      <div className="flex items-center gap-2 md:gap-3">
-                        <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] md:text-xs font-bold shrink-0 overflow-hidden">
+                    <td className="px-4 py-3 border-b border-slate-100 text-slate-500 font-mono">#{item.ordem}</td>
+                    <td className="px-4 py-3 border-b border-slate-100 font-medium text-slate-900">{item.matricula}</td>
+                    <td className="px-4 py-3 border-b border-slate-100 text-slate-700">{item.patente}</td>
+                    <td className="px-4 py-3 border-b border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
                           {item.photoUrl ? (
                             <img src={item.photoUrl} alt={item.nome} className="w-full h-full object-cover" />
                           ) : (
@@ -1479,13 +1322,13 @@ export default function App() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-slate-700 hidden md:table-cell">{item.funcao}</td>
-                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100">
-                      <span className={`px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-[10px] md:text-xs font-semibold uppercase tracking-wide ${getStatusClasses(item.status)}`}>
+                    <td className="px-4 py-3 border-b border-slate-100 text-slate-700">{item.funcao}</td>
+                    <td className="px-4 py-3 border-b border-slate-100">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${getStatusClasses(item.status)}`}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-center hidden md:table-cell">
+                    <td className="px-4 py-3 border-b border-slate-100 text-center">
                       {item.pdfUrl ? (
                         <a href={item.pdfUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title={item.pdfName}>
                           <FileText className="w-4 h-4" />
@@ -1494,12 +1337,12 @@ export default function App() {
                         <span className="text-slate-300">-</span>
                       )}
                     </td>
-                    <td className="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-right">
+                    <td className="px-4 py-3 border-b border-slate-100 text-right">
                       <button onClick={(e) => { e.stopPropagation(); openModal(item); }} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1">
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button aria-label="Excluir item" onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2">
-                        <Trash2 className="w-4 h-4" aria-hidden="true" />
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
@@ -1536,11 +1379,11 @@ export default function App() {
             <thead className="bg-slate-50 sticky top-0 z-10">
               <tr>
                 <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Data/Hora</th>
-                <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Local</th>
-                <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Processo</th>
+                <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Local</th>
+                <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Processo</th>
                 <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Policiais Convocados</th>
                 <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Status</th>
-                <th className="px-4 py-3 text-center font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 hidden md:table-cell">Doc</th>
+                <th className="px-4 py-3 text-center font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Doc</th>
                 <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 text-right">Ações</th>
               </tr>
             </thead>
@@ -1552,8 +1395,8 @@ export default function App() {
                       <td className="px-4 py-3 border-b border-slate-100 font-medium text-slate-900">
                         {new Date(item.data).toLocaleDateString('pt-BR')} às {item.hora}
                       </td>
-                      <td className="px-4 py-3 border-b border-slate-100 text-slate-700 hidden md:table-cell">{item.local}</td>
-                      <td className="px-4 py-3 border-b border-slate-100 text-slate-700 font-mono hidden md:table-cell">{item.processo}</td>
+                      <td className="px-4 py-3 border-b border-slate-100 text-slate-700">{item.local}</td>
+                      <td className="px-4 py-3 border-b border-slate-100 text-slate-700 font-mono">{item.processo}</td>
                       <td className="px-4 py-3 border-b border-slate-100">
                         <div className="flex flex-col gap-1.5">
                           {item.policialIds && item.policialIds.length > 0 ? (
@@ -1587,7 +1430,7 @@ export default function App() {
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 border-b border-slate-100 text-center hidden md:table-cell">
+                      <td className="px-4 py-3 border-b border-slate-100 text-center">
                         {item.pdfs && item.pdfs.length > 0 ? (
                           <div className="flex items-center justify-center gap-1 flex-wrap">
                             {item.pdfs.map((pdf, idx) => (
@@ -1605,8 +1448,8 @@ export default function App() {
                         <button onClick={() => openAudienciaModal(item)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1">
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button aria-label="Excluir item" onClick={() => handleDeleteAudiencia(item.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2">
-                          <Trash2 className="w-4 h-4" aria-hidden="true" />
+                        <button onClick={() => handleDeleteAudiencia(item.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>
@@ -1630,74 +1473,11 @@ export default function App() {
   )}
 
   {activeAdminTab === 'configuracoes' && (
-    <div className="flex-1 overflow-auto p-4 md:p-6 bg-slate-50">
-      
-      {/* Implementação do Padrão do Usuário: Tipografia Básica e Hierarquia */}
-      <div className="max-w-4xl mx-auto space-y-8 text-left">
-        
-        {/* Style Guide Canvas */}
-        <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
-          <div className="mb-8 border-b border-slate-100 pb-4">
-            <span className="text-blue-800 bg-blue-100 px-3 py-1 rounded-full text-sm font-medium mb-4 inline-block">
-              Guia de Estilos / Style Guide
-            </span>
-            <p className="text-gray-600">
-              Padrões visuais, hierarquia de texto e tokens de design adotados pelo sistema.
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            
-            {/* Hierarquia solicitada */}
-            <div className="p-6 bg-slate-50 rounded-lg border border-slate-100">
-              <span className="text-xs font-mono text-slate-400 uppercase tracking-widest mb-4 block">Hierarquia de Títulos (H1, H2, H3)</span>
-              <div className="space-y-4">
-                
-                <h1 className="text-2xl font-bold text-slate-900 border-l-4 border-blue-600 pl-3">
-                  Dashboard
-                </h1>
-                
-                <div className="pl-4 space-y-4">
-                  <h2 className="text-xl font-semibold text-slate-800">
-                    Resumo
-                  </h2>
-                  
-                  <div className="pl-4">
-                    <h3 className="text-lg font-medium text-slate-700">
-                      Detalhes
-                    </h3>
-                    <p className="text-gray-600 mt-2 text-sm max-w-lg">
-                      O uso das tags semânticas corretas e tamanhos progressivos (`text-2xl`, `text-xl`, `text-lg`) garante acessibilidade e organização da informação na tela.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Design Tokens Extras */}
-            <div className="p-6 bg-slate-50 rounded-lg border border-slate-100">
-              <span className="text-xs font-mono text-slate-400 uppercase tracking-widest mb-4 block">Design Tokens Individuais</span>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="text-sm font-medium text-slate-900 mb-2">Badge Secundário</h4>
-                  <span className="text-blue-800 bg-blue-100 px-2.5 py-0.5 rounded-full text-sm font-medium">
-                    Badge
-                  </span>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium text-slate-900 mb-2">Texto Secundário Padrão</h4>
-                  <p className="text-gray-600">
-                    Texto secundário
-                  </p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
+    <div className="flex-1 overflow-auto p-4 md:p-6">
+      <div className="bg-white p-8 rounded-lg border border-slate-200 text-center text-slate-500 flex flex-col items-center justify-center h-64">
+        <Settings className="w-12 h-12 text-slate-300 mb-4" />
+        <h3 className="text-lg font-medium text-slate-900 mb-1">Configurações do Sistema</h3>
+        <p>As configurações avançadas do sistema serão disponibilizadas em breve.</p>
       </div>
     </div>
   )}
@@ -1705,15 +1485,15 @@ export default function App() {
   {activeAdminTab === 'administrativo' && (
     <div className="flex-1 overflow-auto p-4 md:p-6">
       <h3 className="text-lg font-medium text-slate-900 mb-4">Módulo Administrativo</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <button 
           onClick={() => setActiveAdminTab('ficha_individual')}
-          className="bg-white p-4 md:p-8 rounded-lg border border-slate-200 flex flex-col items-center justify-center gap-2 md:gap-4 hover:bg-slate-50 hover:border-blue-300 hover:shadow-md transition-all group"
+          className="bg-white p-8 rounded-lg border border-slate-200 flex flex-col items-center justify-center gap-4 hover:bg-slate-50 hover:border-blue-300 hover:shadow-md transition-all group"
         >
-          <div className="w-10 h-10 md:w-16 md:h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
-            <FileText className="w-5 h-5 md:w-8 md:h-8" />
+          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <FileText className="w-8 h-8" />
           </div>
-          <span className="font-medium text-slate-800 text-sm md:text-lg">Ficha Individual</span>
+          <span className="font-medium text-slate-800 text-lg">Ficha Individual</span>
         </button>
       </div>
     </div>
@@ -1743,6 +1523,9 @@ export default function App() {
         </div>
         
         <div className="flex flex-wrap gap-2 w-full md:w-auto relative">
+          <select className="w-full md:w-auto min-w-[140px] px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50 text-slate-500" disabled title="Filtro futuro">
+            <option>Filtrar por...</option>
+          </select>
           <div className="relative flex-1 md:w-auto md:min-w-[300px]">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
@@ -1798,16 +1581,16 @@ export default function App() {
         if (!member) return null;
         return (
           <div className="bg-white flex-1 rounded-lg border border-slate-200 flex flex-col p-6 shadow-sm">
-            <div className="flex justify-between items-start mb-6 pb-4 border-b border-slate-100 gap-4">
-              <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                <label className="relative w-12 h-12 md:w-16 md:h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg md:text-xl font-bold cursor-pointer group overflow-hidden shrink-0">
+            <div className="flex justify-between items-start mb-6 pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-4">
+                <label className="relative w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold cursor-pointer group overflow-hidden shrink-0">
                   {member.photoUrl ? (
                     <img src={member.photoUrl} alt={member.nome} className="w-full h-full object-cover" />
                   ) : (
                     member.nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
                   )}
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <FileUp className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                    <FileUp className="w-6 h-6 text-white" />
                   </div>
                   <input 
                     type="file" 
@@ -1816,9 +1599,9 @@ export default function App() {
                     onChange={(e) => handlePhotoUpload(e, member.id)}
                   />
                 </label>
-                <div className="min-w-0">
-                  <h2 className="text-lg md:text-2xl font-bold text-slate-900 truncate">{member.patente} {member.nome}</h2>
-                  <p className="text-xs md:text-base text-slate-500 truncate">{member.guerra} | Matrícula: {member.matricula}</p>
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">{member.patente} {member.nome}</h2>
+                  <p className="text-slate-500">{member.guerra} | Matrícula: {member.matricula}</p>
                 </div>
               </div>
               <button 
@@ -1856,28 +1639,28 @@ export default function App() {
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div>
-                            <label htmlFor="ficha-guerra" className="block text-xs font-medium text-slate-500 mb-1">Nome de Guerra</label>
-                            <input id="ficha-guerra" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.guerra || ''} onChange={(e) => setFichaFormData({...fichaFormData, guerra: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Nome de Guerra</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.guerra || ''} onChange={(e) => setFichaFormData({...fichaFormData, guerra: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-quadro" className="block text-xs font-medium text-slate-500 mb-1">Quadro</label>
-                            <input id="ficha-quadro" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="Ex: QOPM" value={fichaFormData.quadro || ''} onChange={(e) => setFichaFormData({...fichaFormData, quadro: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Quadro</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="Ex: QOPM" value={fichaFormData.quadro || ''} onChange={(e) => setFichaFormData({...fichaFormData, quadro: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-patente" className="block text-xs font-medium text-slate-500 mb-1">Posto/Grad.</label>
-                            <input id="ficha-patente" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.patente || ''} onChange={(e) => setFichaFormData({...fichaFormData, patente: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Posto/Grad.</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.patente || ''} onChange={(e) => setFichaFormData({...fichaFormData, patente: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-rgmilitar" className="block text-xs font-medium text-slate-500 mb-1">RG Militar</label>
-                            <input id="ficha-rgmilitar" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="000.000" value={fichaFormData.rgMilitar || ''} onChange={(e) => setFichaFormData({...fichaFormData, rgMilitar: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">RG Militar</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="000.000" value={fichaFormData.rgMilitar || ''} onChange={(e) => setFichaFormData({...fichaFormData, rgMilitar: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-dt-rg" className="block text-xs font-medium text-slate-500 mb-1">Data de Emissão</label>
-                            <input id="ficha-dt-rg" type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataEmissaoRg || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataEmissaoRg: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Data de Emissão</label>
+                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataEmissaoRg || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataEmissaoRg: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-comp" className="block text-xs font-medium text-slate-500 mb-1">Comportamento</label>
-                            <select id="ficha-comp" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.comportamento || 'Bom'} onChange={(e) => setFichaFormData({...fichaFormData, comportamento: e.target.value})}>
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Comportamento</label>
+                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.comportamento || 'Bom'} onChange={(e) => setFichaFormData({...fichaFormData, comportamento: e.target.value})}>
                               <option value="Excepcional">Excepcional</option>
                               <option value="Ótimo">Ótimo</option>
                               <option value="Bom">Bom</option>
@@ -1895,55 +1678,55 @@ export default function App() {
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div className="lg:col-span-2">
-                            <label htmlFor="ficha-nome" className="block text-xs font-medium text-slate-500 mb-1">Nome Completo</label>
-                            <input id="ficha-nome" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.nome || ''} onChange={(e) => setFichaFormData({...fichaFormData, nome: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Nome Completo</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.nome || ''} onChange={(e) => setFichaFormData({...fichaFormData, nome: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-cpf" className="block text-xs font-medium text-slate-500 mb-1">CPF</label>
-                            <input id="ficha-cpf" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="000.000.000-00" value={fichaFormData.cpf || ''} onChange={(e) => setFichaFormData({...fichaFormData, cpf: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">CPF</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="000.000.000-00" value={fichaFormData.cpf || ''} onChange={(e) => setFichaFormData({...fichaFormData, cpf: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-matricula" className="block text-xs font-medium text-slate-500 mb-1">Matrícula</label>
-                            <input id="ficha-matricula" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.matricula || ''} onChange={(e) => setFichaFormData({...fichaFormData, matricula: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Matrícula</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.matricula || ''} onChange={(e) => setFichaFormData({...fichaFormData, matricula: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-vinculo" className="block text-xs font-medium text-slate-500 mb-1">Vínculo</label>
-                            <input id="ficha-vinculo" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="Efetivo" value={fichaFormData.vinculo || ''} onChange={(e) => setFichaFormData({...fichaFormData, vinculo: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Vínculo</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="Efetivo" value={fichaFormData.vinculo || ''} onChange={(e) => setFichaFormData({...fichaFormData, vinculo: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-dt-nasc" className="block text-xs font-medium text-slate-500 mb-1">Data de Nascimento</label>
-                            <input id="ficha-dt-nasc" type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataNascimento: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Data de Nascimento</label>
+                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataNascimento: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-cidade-nasc" className="block text-xs font-medium text-slate-500 mb-1">Cidade de Nascimento</label>
-                            <input id="ficha-cidade-nasc" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.cidadeNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, cidadeNascimento: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Cidade de Nascimento</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.cidadeNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, cidadeNascimento: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-uf" className="block text-xs font-medium text-slate-500 mb-1">UF Nascimento</label>
-                            <select id="ficha-uf" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.ufNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, ufNascimento: e.target.value})}>
+                            <label className="block text-xs font-medium text-slate-500 mb-1">UF Nascimento</label>
+                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.ufNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, ufNascimento: e.target.value})}>
                               <option value="">Selecione...</option>
                               <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
                             </select>
                           </div>
                           <div>
-                            <label htmlFor="ficha-pasep" className="block text-xs font-medium text-slate-500 mb-1">PASEP</label>
-                            <input id="ficha-pasep" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.pasep || ''} onChange={(e) => setFichaFormData({...fichaFormData, pasep: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">PASEP</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.pasep || ''} onChange={(e) => setFichaFormData({...fichaFormData, pasep: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-reg-civil" className="block text-xs font-medium text-slate-500 mb-1">Reg. Civil</label>
-                            <input id="ficha-reg-civil" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.regCivil || ''} onChange={(e) => setFichaFormData({...fichaFormData, regCivil: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Reg. Civil</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.regCivil || ''} onChange={(e) => setFichaFormData({...fichaFormData, regCivil: e.target.value})} />
                           </div>
                           <div className="lg:col-span-2">
-                            <label htmlFor="ficha-pai" className="block text-xs font-medium text-slate-500 mb-1">Pai</label>
-                            <input id="ficha-pai" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.pai || ''} onChange={(e) => setFichaFormData({...fichaFormData, pai: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Pai</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.pai || ''} onChange={(e) => setFichaFormData({...fichaFormData, pai: e.target.value})} />
                           </div>
                           <div className="lg:col-span-2">
-                            <label htmlFor="ficha-mae" className="block text-xs font-medium text-slate-500 mb-1">Mãe</label>
-                            <input id="ficha-mae" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.mae || ''} onChange={(e) => setFichaFormData({...fichaFormData, mae: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Mãe</label>
+                            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.mae || ''} onChange={(e) => setFichaFormData({...fichaFormData, mae: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-sangue" className="block text-xs font-medium text-slate-500 mb-1">Tipo Sanguíneo</label>
-                            <select id="ficha-sangue" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.tipoSanguineo || ''} onChange={(e) => setFichaFormData({...fichaFormData, tipoSanguineo: e.target.value})}>
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Tipo Sanguíneo</label>
+                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.tipoSanguineo || ''} onChange={(e) => setFichaFormData({...fichaFormData, tipoSanguineo: e.target.value})}>
                               <option value="">Selecione...</option>
                               <option value="A">A</option>
                               <option value="B">B</option>
@@ -1952,8 +1735,8 @@ export default function App() {
                             </select>
                           </div>
                           <div>
-                            <label htmlFor="ficha-fator-rh" className="block text-xs font-medium text-slate-500 mb-1">Fator RH</label>
-                            <select id="ficha-fator-rh" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.fatorRh || ''} onChange={(e) => setFichaFormData({...fichaFormData, fatorRh: e.target.value})}>
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Fator RH</label>
+                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.fatorRh || ''} onChange={(e) => setFichaFormData({...fichaFormData, fatorRh: e.target.value})}>
                               <option value="">Selecione...</option>
                               <option value="+">Positivo (+)</option>
                               <option value="-">Negativo (-)</option>
@@ -1969,12 +1752,12 @@ export default function App() {
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div>
-                            <label htmlFor="ficha-dt-inc" className="block text-xs font-medium text-slate-500 mb-1">Data Inclusão</label>
-                            <input id="ficha-dt-inc" type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataInclusao || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataInclusao: e.target.value})} />
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Data Inclusão</label>
+                            <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataInclusao || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataInclusao: e.target.value})} />
                           </div>
                           <div>
-                            <label htmlFor="ficha-status" className="block text-xs font-medium text-slate-500 mb-1">Situação</label>
-                            <select id="ficha-status" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.status || 'Ativo'} onChange={(e) => setFichaFormData({...fichaFormData, status: e.target.value})}>
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Situação</label>
+                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.status || 'Ativo'} onChange={(e) => setFichaFormData({...fichaFormData, status: e.target.value})}>
                               <option value="Ativo">Ativo</option>
                               <option value="Férias">Férias</option>
                               <option value="Licença">Licença</option>
@@ -1993,7 +1776,7 @@ export default function App() {
                         </button>
                         <button 
                           onClick={handleSaveFicha}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
                         >
                           <CheckCircle className="w-4 h-4" /> Salvar Alterações
                         </button>
@@ -2069,13 +1852,12 @@ export default function App() {
                                             </div>
                                           </div>
                                         </div>
-                                        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                           <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Baixar">
                                             <Download className="w-4 h-4" />
                                           </a>
-                                          {/* eslint-disable-next-line react-hooks/refs */}
-                                          <button aria-label="Excluir item" onClick={() => handleRemoveAnexo(anexo.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" title="Remover">
-                                            <Trash2 className="w-4 h-4" aria-hidden="true" />
+                                          <button onClick={() => handleRemoveAnexo(anexo.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Remover">
+                                            <Trash2 className="w-4 h-4" />
                                           </button>
                                         </div>
                                       </div>
@@ -2134,20 +1916,19 @@ export default function App() {
                     <button 
                       key={idx}
                       onClick={() => setActiveFichaSection(section.name)}
-                      className="bg-slate-50 border border-slate-200 rounded-lg p-3 md:p-4 flex flex-col items-center justify-center gap-2 md:gap-3 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors text-slate-600 group"
+                      className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex flex-col items-center justify-center gap-3 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors text-slate-600 group"
                     >
-                      <section.icon className="w-5 h-5 md:w-8 md:h-8 text-slate-400 group-hover:text-blue-600 transition-colors" />
-                      <span className="text-[10px] md:text-sm font-medium text-center leading-tight">{section.name}</span>
+                      <section.icon className="w-8 h-8 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                      <span className="text-sm font-medium text-center leading-tight">{section.name}</span>
                     </button>
                   ))}
                   
                   {/* Botão Especial: Gerar Ficha Individual */}
                   <button 
-                    onClick={() => window.print()}
-                    className="bg-blue-600 border border-blue-700 rounded-lg p-3 md:p-4 flex flex-col items-center justify-center gap-2 md:gap-3 hover:bg-blue-700 text-white transition-colors shadow-sm group"
+                    className="bg-blue-600 border border-blue-700 rounded-lg p-4 flex flex-col items-center justify-center gap-3 hover:bg-blue-700 text-white transition-colors shadow-sm group"
                   >
-                    <Printer className="w-5 h-5 md:w-8 md:h-8 text-blue-200 group-hover:text-white transition-colors" />
-                    <span className="text-[10px] md:text-sm font-medium text-center leading-tight">Gerar Ficha Individual</span>
+                    <Printer className="w-8 h-8 text-blue-200 group-hover:text-white transition-colors" />
+                    <span className="text-sm font-medium text-center leading-tight">Gerar Ficha Individual</span>
                   </button>
                 </div>
               )}
@@ -2170,22 +1951,13 @@ export default function App() {
 {/* Modal Audiência */}
       {isAudienciaModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div 
-            className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-300"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-audiencia-title"
-          >
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-300">
             <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center shrink-0">
-              <h3 id="modal-audiencia-title" className="text-lg font-bold text-slate-900">
+              <h3 className="text-lg font-bold text-slate-900">
                 {editingAudienciaId ? 'Editar Audiência' : 'Agendar Nova Audiência'}
               </h3>
-              <button 
-                onClick={closeAudienciaModal} 
-                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
-                aria-label="Fechar"
-              >
-                <X className="w-5 h-5" aria-hidden="true" />
+              <button onClick={closeAudienciaModal} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors">
+                <X className="w-5 h-5" />
               </button>
             </div>
             
@@ -2193,43 +1965,39 @@ export default function App() {
               <div className="p-6 overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="aud-data" className="text-sm font-medium text-slate-700">Data *</label>
+                    <label className="text-sm font-medium text-slate-700">Data *</label>
                     <input 
-                      id="aud-data"
                       type="date" required
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={audienciaFormData.data || ''} onChange={e => setAudienciaFormData({...audienciaFormData, data: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="aud-hora" className="text-sm font-medium text-slate-700">Hora *</label>
+                    <label className="text-sm font-medium text-slate-700">Hora *</label>
                     <input 
-                      id="aud-hora"
                       type="time" required
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={audienciaFormData.hora || ''} onChange={e => setAudienciaFormData({...audienciaFormData, hora: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label htmlFor="aud-local" className="text-sm font-medium text-slate-700">Local (Vara/Fórum) *</label>
+                    <label className="text-sm font-medium text-slate-700">Local (Vara/Fórum) *</label>
                     <input 
-                      id="aud-local"
                       type="text" required placeholder="Ex: 1ª Vara Criminal da Comarca..."
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={audienciaFormData.local || ''} onChange={e => setAudienciaFormData({...audienciaFormData, local: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label htmlFor="aud-processo" className="text-sm font-medium text-slate-700">Número do Processo *</label>
+                    <label className="text-sm font-medium text-slate-700">Número do Processo *</label>
                     <input 
-                      id="aud-processo"
                       type="text" required placeholder="Ex: 0001234-56.2026.8.19.0001"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono text-sm"
                       value={audienciaFormData.processo || ''} onChange={e => setAudienciaFormData({...audienciaFormData, processo: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label htmlFor="aud-policias" className="text-sm font-medium text-slate-700">Policiais Convocados *</label>
+                    <label className="text-sm font-medium text-slate-700">Policiais Convocados *</label>
                     
                     {audienciaFormData.policialIds && audienciaFormData.policialIds.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-1">
@@ -2263,9 +2031,8 @@ export default function App() {
                     )}
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="aud-status" className="text-sm font-medium text-slate-700">Status *</label>
+                    <label className="text-sm font-medium text-slate-700">Status *</label>
                     <select 
-                      id="aud-status"
                       required
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={audienciaFormData.status || 'Agendada'} onChange={e => setAudienciaFormData({...audienciaFormData, status: e.target.value as Audiencia['status']})}
@@ -2276,17 +2043,16 @@ export default function App() {
                     </select>
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label htmlFor="aud-obs" className="text-sm font-medium text-slate-700">Observações</label>
+                    <label className="text-sm font-medium text-slate-700">Observações</label>
                     <textarea 
-                      id="aud-obs"
                       rows={3} placeholder="Informações adicionais..."
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
                       value={audienciaFormData.observacoes || ''} onChange={e => setAudienciaFormData({...audienciaFormData, observacoes: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <span className="text-sm font-medium text-slate-700" id="docs-label">Documentos Anexos (PDFs)</span>
-                    <div className="flex flex-col gap-3" aria-labelledby="docs-label">
+                    <label className="text-sm font-medium text-slate-700">Documentos Anexos (PDFs)</label>
+                    <div className="flex flex-col gap-3">
                       {audienciaFormData.pdfs && audienciaFormData.pdfs.length > 0 && (
                         <div className="flex flex-col gap-2">
                           {audienciaFormData.pdfs.map(pdf => (
@@ -2295,8 +2061,8 @@ export default function App() {
                                 <FileText className="w-5 h-5 text-red-500 shrink-0" />
                                 <span className="text-sm text-slate-700 truncate">{pdf.name}</span>
                               </div>
-                              <button type="button" aria-label="Excluir item" onClick={() => handleRemoveAudienciaPdf(pdf.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" title="Remover PDF">
-                                <Trash2 className="w-4 h-4" aria-hidden="true" />
+                              <button type="button" onClick={() => handleRemoveAudienciaPdf(pdf.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors shrink-0" title="Remover PDF">
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           ))}
@@ -2317,10 +2083,10 @@ export default function App() {
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 shrink-0">
-                <button type="button" onClick={closeAudienciaModal} className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2">
+                <button type="button" onClick={closeAudienciaModal} className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 rounded-md transition-colors">
                   Cancelar
                 </button>
-                <button type="submit" className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+                <button type="submit" className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors shadow-sm">
                   Salvar Audiência
                 </button>
               </div>
@@ -2330,22 +2096,13 @@ export default function App() {
       )}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div 
-            className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-300"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-militar-title"
-          >
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-300">
             <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center shrink-0">
-              <h3 id="modal-militar-title" className="text-lg font-bold text-slate-900">
+              <h3 className="text-lg font-bold text-slate-900">
                 {editingId ? 'Editar Militar' : 'Adicionar Novo Militar'}
               </h3>
-              <button 
-                onClick={closeModal} 
-                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
-                aria-label="Fechar"
-              >
-                <X className="w-5 h-5" aria-hidden="true" />
+              <button onClick={closeModal} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors">
+                <X className="w-5 h-5" />
               </button>
             </div>
             
@@ -2353,27 +2110,24 @@ export default function App() {
               <div className="p-6 overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="militar-mat" className="text-sm font-medium text-slate-700">Matrícula *</label>
+                    <label className="text-sm font-medium text-slate-700">Matrícula *</label>
                     <input 
-                      id="militar-mat"
                       type="text" required placeholder="Ex: 123.456-7"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.matricula || ''} onChange={e => setFormData({...formData, matricula: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="militar-cpf" className="text-sm font-medium text-slate-700">CPF *</label>
+                    <label className="text-sm font-medium text-slate-700">CPF *</label>
                     <input 
-                      id="militar-cpf"
                       type="text" required placeholder="Ex: 111.111.111-11"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.cpf || ''} onChange={e => setFormData({...formData, cpf: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label htmlFor="militar-pat" className="text-sm font-medium text-slate-700">Patente *</label>
+                    <label className="text-sm font-medium text-slate-700">Patente *</label>
                     <select 
-                      id="militar-pat"
                       required
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
                       value={formData.patente || ''} onChange={e => setFormData({...formData, patente: e.target.value})}
@@ -2383,27 +2137,24 @@ export default function App() {
                     </select>
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label htmlFor="militar-nome" className="text-sm font-medium text-slate-700">Nome Completo *</label>
+                    <label className="text-sm font-medium text-slate-700">Nome Completo *</label>
                     <input 
-                      id="militar-nome"
                       type="text" required placeholder="Nome completo do policial"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.nome || ''} onChange={e => setFormData({...formData, nome: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="militar-guerra" className="text-sm font-medium text-slate-700">Nome de Guerra</label>
+                    <label className="text-sm font-medium text-slate-700">Nome de Guerra</label>
                     <input 
-                      id="militar-guerra"
                       type="text" placeholder="Nome na tarjeta"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.guerra || ''} onChange={e => setFormData({...formData, guerra: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="militar-funcao" className="text-sm font-medium text-slate-700">Função</label>
+                    <label className="text-sm font-medium text-slate-700">Função</label>
                     <input 
-                      id="militar-funcao"
                       type="text" list="funcoesList" placeholder="Ex: Patrulha"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.funcao || ''} onChange={e => setFormData({...formData, funcao: e.target.value})}
@@ -2413,27 +2164,24 @@ export default function App() {
                     </datalist>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="militar-tel" className="text-sm font-medium text-slate-700">Telefone</label>
+                    <label className="text-sm font-medium text-slate-700">Telefone</label>
                     <input 
-                      id="militar-tel"
                       type="tel" placeholder="(21) 90000-0000"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.telefone || ''} onChange={e => setFormData({...formData, telefone: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="militar-email" className="text-sm font-medium text-slate-700">Email</label>
+                    <label className="text-sm font-medium text-slate-700">Email</label>
                     <input 
-                      id="militar-email"
                       type="email" placeholder="email@exemplo.com"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                       value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label htmlFor="militar-status" className="text-sm font-medium text-slate-700">Status Operacional</label>
+                    <label className="text-sm font-medium text-slate-700">Status Operacional</label>
                     <select 
-                      id="militar-status"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
                       value={formData.status || 'Ativo'} onChange={e => setFormData({...formData, status: e.target.value as Status})}
                     >
@@ -2444,9 +2192,8 @@ export default function App() {
                     </select>
                   </div>
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label htmlFor="militar-pdf" className="text-sm font-medium text-slate-700">Documento Anexo (PDF)</label>
+                    <label className="text-sm font-medium text-slate-700">Documento Anexo (PDF)</label>
                     <input 
-                      id="militar-pdf"
                       type="file" accept=".pdf"
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                       onChange={e => {
@@ -2478,10 +2225,10 @@ export default function App() {
                 </div>
               </div>
               <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3 shrink-0 rounded-b-xl">
-                <button type="button" onClick={closeModal} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-100 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2">
+                <button type="button" onClick={closeModal} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-100 font-medium transition-colors">
                   Cancelar
                 </button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors">
                   Salvar Registro
                 </button>
               </div>
