@@ -27,6 +27,17 @@ export default [
       ...reactHooks.configs.recommended.rules,
       ...a11y.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      
+      // Regras explícitas de acessibilidade solicitadas
+      'jsx-a11y/alt-text': 'error',
+      'jsx-a11y/aria-props': 'error',
+      'jsx-a11y/aria-role': 'error',
+      'jsx-a11y/click-events-have-key-events': 'error',
+      'jsx-a11y/interactive-supports-focus': 'error',
+      'jsx-a11y/label-has-associated-control': 'error',
+      'jsx-a11y/no-autofocus': 'warn',
+      'jsx-a11y/no-noninteractive-element-interactions': 'error',
     },
     settings: { react: { version: 'detect' } },
   },
