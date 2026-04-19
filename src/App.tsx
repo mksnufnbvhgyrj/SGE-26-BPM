@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase } from './lib/supabase';
-import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, FileUp, Settings, LogOut, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, FileSpreadsheet, File, Upload, UploadCloud } from 'lucide-react';
+import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, FileUp, Settings, LogOut, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, FileSpreadsheet, File, Upload, UploadCloud, ArrowRightLeft } from 'lucide-react';
 
 import Clock from './components/Clock';
 
@@ -688,6 +688,9 @@ export default function App() {
           <button onClick={() => setActiveAdminTab('audiencias')} className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2.5 rounded-md transition-colors ${activeAdminTab === 'audiencias' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 hover:text-white'}`} title="Audiências">
             <Scale className="w-5 h-5 shrink-0" /> {!isSidebarCollapsed && <span className="whitespace-nowrap">Audiências</span>}
           </button>
+          <button onClick={() => setActiveAdminTab('permutas')} className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2.5 rounded-md transition-colors ${activeAdminTab === 'permutas' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 hover:text-white'}`} title="Permutas">
+            <ArrowRightLeft className="w-5 h-5 shrink-0" /> {!isSidebarCollapsed && <span className="whitespace-nowrap">Permutas</span>}
+          </button>
           <button onClick={() => setActiveAdminTab('administrativo')} className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2.5 rounded-md transition-colors ${activeAdminTab === 'administrativo' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 hover:text-white'}`} title="Administrativo">
             <Briefcase className="w-5 h-5 shrink-0" /> {!isSidebarCollapsed && <span className="whitespace-nowrap">Administrativo</span>}
           </button>
@@ -722,6 +725,9 @@ export default function App() {
               <button onClick={() => { setActiveAdminTab('audiencias'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors ${activeAdminTab === 'audiencias' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 hover:text-white'}`}>
                 <Scale className="w-5 h-5" /> Audiências
               </button>
+              <button onClick={() => { setActiveAdminTab('permutas'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors ${activeAdminTab === 'permutas' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 hover:text-white'}`}>
+                <ArrowRightLeft className="w-5 h-5" /> Permutas
+              </button>
               <button onClick={() => { setActiveAdminTab('administrativo'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors ${activeAdminTab === 'administrativo' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 hover:text-white'}`}>
                 <Briefcase className="w-5 h-5" /> Administrativo
               </button>
@@ -749,6 +755,7 @@ export default function App() {
             <h2 className="text-lg md:text-xl font-bold text-slate-800 truncate">
               {activeAdminTab === 'efetivo' && 'Controle de Efetivo'}
               {activeAdminTab === 'audiencias' && 'Gestão de Audiências'}
+              {activeAdminTab === 'permutas' && 'Gestão de Permutas'}
               {activeAdminTab === 'administrativo' && 'Módulo Administrativo'}
               {activeAdminTab === 'ficha_individual' && 'Ficha Individual'}
               {activeAdminTab === 'configuracoes' && 'Configurações do Sistema'}
@@ -1052,6 +1059,22 @@ export default function App() {
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+  )}
+
+  {activeAdminTab === 'permutas' && (
+    <div className="flex-1 flex flex-col p-4 md:p-6 overflow-hidden">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 shrink-0">
+        <h3 className="text-lg font-bold text-slate-800">Gestão de Permutas</h3>
+        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 shadow-sm w-full sm:w-auto justify-center">
+          <Plus className="w-4 h-4" /> Registrar Permuta
+        </button>
+      </div>
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center p-8 text-center flex-1">
+        <ArrowRightLeft className="w-16 h-16 text-slate-300 mb-4" />
+        <h2 className="text-xl font-semibold text-slate-800 mb-2">Módulo em Desenvolvimento</h2>
+        <p className="text-slate-500 max-w-md">O controle de trocas de serviço (permutas) será liberado nas próximas atualizações. Acompanhe!</p>
       </div>
     </div>
   )}

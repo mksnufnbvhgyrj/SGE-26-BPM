@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Scale, Briefcase, Settings, LogOut, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, Scale, Briefcase, Settings, LogOut, X, ChevronLeft, ChevronRight, ArrowRightLeft } from 'lucide-react';
 import { Member, Audiencia, DashboardStats } from '../../types';
 import { StatsCards } from '../common/StatsCards';
 import { Header } from '../common/Header';
@@ -21,7 +21,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onAudienciasChange,
 }) => {
-  const [activeTab, setActiveTab] = useState<'efetivo' | 'audiencias' | 'administrativo' | 'configuracoes'>('efetivo');
+  const [activeTab, setActiveTab] = useState<'efetivo' | 'audiencias' | 'permutas' | 'administrativo' | 'configuracoes'>('efetivo');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -131,6 +131,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onClick={() => setActiveTab('audiencias')}
           />
           <SidebarItem
+            icon={ArrowRightLeft}
+            label="Permutas"
+            isActive={activeTab === 'permutas'}
+            collapsed={isSidebarCollapsed}
+            onClick={() => setActiveTab('permutas')}
+          />
+          <SidebarItem
             icon={Briefcase}
             label="Administrativo"
             isActive={activeTab === 'administrativo'}
@@ -193,6 +200,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 onClick={() => { setActiveTab('audiencias'); setIsMobileMenuOpen(false); }}
               />
               <SidebarItem
+                icon={ArrowRightLeft}
+                label="Permutas"
+                isActive={activeTab === 'permutas'}
+                collapsed={false}
+                onClick={() => { setActiveTab('permutas'); setIsMobileMenuOpen(false); }}
+              />
+              <SidebarItem
                 icon={Briefcase}
                 label="Administrativo"
                 isActive={activeTab === 'administrativo'}
@@ -238,6 +252,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {activeTab === 'audiencias' && (
               <div className="bg-white rounded-xl p-6 border border-slate-200">
                 <h2 className="text-xl font-bold mb-4">Gestão de Audiências</h2>
+                <p className="text-slate-600">Funcionalidade em desenvolvimento...</p>
+              </div>
+            )}
+
+            {activeTab === 'permutas' && (
+              <div className="bg-white rounded-xl p-6 border border-slate-200">
+                <h2 className="text-xl font-bold mb-4">Gestão de Permutas</h2>
                 <p className="text-slate-600">Funcionalidade em desenvolvimento...</p>
               </div>
             )}
