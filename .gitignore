@@ -1,17 +1,14 @@
 # Dependencies
 node_modules/
 
+# Logs and temp files
+*.log
+*.tmp
+
 # Environment
 .env
 .env.local
 .env.*
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*.swp
 
 # Editors
 .vscode/
@@ -25,16 +22,20 @@ __pycache__/
 .Python
 venv/
 .venv/
-.env/
+env/
+ENV/
 
 # Build outputs
 dist/
 build/
-target/
-out/
 *.out
+*.exe
+*.dll
+*.so
+*.a
+*.obj
 
-# Compression files
+# Compression
 *.zip
 *.gz
 *.tar
@@ -53,11 +54,41 @@ out/
 *.Z
 *.lz
 *.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
 
-# System files
+# OS
 .DS_Store
 Thumbs.db
+
+# Testing
+.coverage
+coverage/
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Java/Maven/Gradle
+target/
+.gradle/
+*.class
+
+# Go
+*.exe
+*.dll
+*.so
+*.dylib
+
+# C/C++
+*.o
+*.a
+*.obj
+*.out
+
+# Node.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.swp
+*.swo
+*~
