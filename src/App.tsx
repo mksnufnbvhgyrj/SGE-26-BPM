@@ -646,7 +646,7 @@ export default function App() {
   }
 
   if (authState.role === null) {
-    return <LoginScreen onLogin={setAuthState} members={members} adminPassword="admin123" />;
+    return <LoginScreen onLogin={setAuthState} members={members} />;
   }
 
   if (authState.role === 'USER') {

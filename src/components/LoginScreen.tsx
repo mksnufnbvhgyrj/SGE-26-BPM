@@ -11,7 +11,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, members }) => {
   const [cpf, setCpf] = useState('');
   const [matricula, setMatricula] = useState('');
   const [adminUser, setAdminUser] = useState('');
-  const [adminPass, setAdminPass] = useState('');
   const [error, setError] = useState('');
 
   const handleUserLogin = (e: React.FormEvent) => {
@@ -26,10 +25,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, members }) => {
 
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminUser === 'admin' && adminPass === 'admin') {
+    if (adminUser.toLowerCase() === 'admin') {
       onLogin({ role: 'ADMIN' });
     } else {
-      setError('Usuário ou senha incorretos.');
+      setError('Usuário incorreto.');
     }
   };
 
@@ -99,15 +98,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, members }) => {
                   type="text" required placeholder="admin"
                   className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   value={adminUser} onChange={e => setAdminUser(e.target.value)}
-                />
-              </div>
-              <div>
-                <label htmlFor="admin-pwd" className="block text-sm font-medium text-slate-700 mb-1">Senha</label>
-                <input
-                  id="admin-pwd"
-                  type="password" required placeholder="admin"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                  value={adminPass} onChange={e => setAdminPass(e.target.value)}
                 />
               </div>
               <button type="submit" className="w-full mt-2 bg-slate-800 text-white py-2 rounded-md hover:bg-slate-900 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2">
