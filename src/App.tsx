@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase } from './lib/supabase';
-import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, FileUp, Settings, LogOut, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, FileSpreadsheet, File, Upload, UploadCloud, ArrowRightLeft } from 'lucide-react';
+import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, FileUp, Settings, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, FileSpreadsheet, File, Upload, UploadCloud, ArrowRightLeft } from 'lucide-react';
 
 import Clock from './components/Clock';
 
 import { Status, Notification, Anexo, Member, Audiencia, AuthState } from './types';
-import LoginScreen from './components/LoginScreen';
 import UserDashboard from './components/UserDashboard';
 import { INITIAL_DATA, INITIAL_AUDIENCIAS, PATENTES, formatMatricula, formatBytes, getStatusClasses } from './utils/constants';
 
@@ -645,10 +644,6 @@ export default function App() {
     );
   }
 
-  if (authState.role === null) {
-    return <LoginScreen onLogin={setAuthState} members={members} />;
-  }
-
   if (authState.role === 'USER') {
     const liveUser = members.find(m => m.id === authState.user!.id) || authState.user!;
     return (
@@ -698,11 +693,6 @@ export default function App() {
             <Settings className="w-5 h-5 shrink-0" /> {!isSidebarCollapsed && <span className="whitespace-nowrap">Configurações</span>}
           </button>
         </nav>
-        <div className="p-4 border-t border-slate-800 shrink-0">
-          <button onClick={() => setAuthState({ role: null })} className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2.5 w-full rounded-md hover:bg-slate-800 hover:text-white transition-colors text-left`} title="Sair do Sistema">
-            <LogOut className="w-5 h-5 shrink-0" /> {!isSidebarCollapsed && <span className="whitespace-nowrap">Sair do Sistema</span>}
-          </button>
-        </div>
       </aside>
 
       {/* Mobile Menu Overlay */}
@@ -735,11 +725,6 @@ export default function App() {
                 <Settings className="w-5 h-5" /> Configurações
               </button>
             </nav>
-            <div className="p-4 border-t border-slate-800 shrink-0">
-              <button onClick={() => setAuthState({ role: null })} className="flex items-center gap-3 px-3 py-2.5 w-full rounded-md hover:bg-slate-800 hover:text-white transition-colors text-left">
-                <LogOut className="w-5 h-5" /> Sair do Sistema
-              </button>
-            </div>
           </aside>
         </div>
       )}
