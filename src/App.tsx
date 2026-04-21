@@ -374,18 +374,17 @@ export default function App() {
         }
 
         const currentMaxId = members.length > 0 ? Math.max(...members.map(m => m.id)) : 0;
-        let nextIdForNew = currentMaxId + 1;
+        let nextId = currentMaxId + 1;
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const importedMembers: Member[] = data.map((row: any) => {
-          const findKey = (candidates: string[]) => {
-            const key = Object.keys(row).find(k => 
-              candidates.some(c => k.toLowerCase().trim().includes(c.toLowerCase()))
-            );
-            return key ? row[key] : undefined;
-          };
+        const findKey = (row: Record<string, unknown>, candidates: string[]) => {
+          const key = Object.keys(row).find(k => 
+            candidates.some(c => k.toLowerCase().trim().includes(c.toLowerCase()))
+          );
+          return key ? row[key] : undefined;
+        };
 
-          const statusRaw = findKey(['status', 'situação', 'situacao', 'estado']) || 'Ativo';
+        const importedMembers: Member[] = data.map((row: Record<string, unknown>) => {
+          const statusRaw = findKey(row, ['status', 'situação', 'situacao', 'estado']) || 'Ativo';
           let status: Status = 'Ativo';
           const sLower = String(statusRaw).toLowerCase();
           if (['férias', 'ferias', 'vacation'].some(s => sLower.includes(s))) status = 'Férias';
@@ -393,18 +392,18 @@ export default function App() {
           else if (['afastado', 'away'].some(s => sLower.includes(s))) status = 'Afastado';
 
           return {
-            id: 0, // Temporary
-            ordem: Number(findKey(['ordem', 'nº', 'posicao', 'posição'])) || 0,
-            matricula: String(findKey(['matricula', 'matrícula', 'id', 'registro']) || '').trim(),
-            cpf: String(findKey(['cpf', 'documento']) || '').trim(),
-            patente: String(findKey(['patente', 'grad', 'graduação', 'graduacao', 'posto']) || '').trim(),
-            nome: String(findKey(['nome', 'nome completo', 'policial']) || '').trim(),
-            guerra: String(findKey(['guerra', 'nome de guerra', 'conhecido']) || '').trim(),
-            funcao: String(findKey(['funcao', 'função', 'cargo', 'atribuição']) || '').trim(),
-            telefone: String(findKey(['telefone', 'celular', 'contato']) || '').trim(),
-            email: String(findKey(['email', 'e-mail', 'correio']) || '').trim(),
-            status: status
-          };
+            id: 0,
+            ordem: Number(findKey(row, ['ordem', 'nº', 'posicao', 'posição'])) || 0,
+            matricula: String(findKey(row, ['matricula', 'matrícula', 'id', 'registro']) || '').trim(),
+            cpf: String(findKey(row, ['cpf', 'documento']) || '').trim(),
+            patente: String(findKey(row, ['patente', 'grad', 'graduação', 'graduacao', 'posto']) || '').trim(),
+            nome: String(findKey(row, ['nome', 'nome completo', 'policial']) || '').trim(),
+            guerra: String(findKey(row, ['guerra', 'nome de guerra', 'conhecido']) || '').trim(),
+            funcao: String(findKey(row, ['funcao', 'função', 'cargo', 'atribuição']) || '').trim(),
+            telefone: String(findKey(row, ['telefone', 'celular', 'contato']) || '').trim(),
+            email: String(findKey(row, ['email', 'e-mail', 'correio']) || '').trim(),
+            status
+          } as Member;
         });
 
         const updatedMembers = [...members];
@@ -428,7 +427,7 @@ export default function App() {
             };
             updatedCount++;
           } else {
-            updatedMembers.push({ ...newM, id: nextIdForNew++ });
+            updatedMembers.push({ ...newM, id: nextId++ });
             importedCount++;
           }
         });
@@ -538,7 +537,7 @@ export default function App() {
 
   const handleSaveAudiencia = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!audienciaFormData.policialIds || audienciaFormData.policialIds.length === 0) {
+    if (!audienciaFormData.policialIds?.length) {
       showToast('Selecione pelo menos um policial convocado.', 'danger');
       return;
     }
@@ -547,11 +546,7 @@ export default function App() {
       setAudiencias(audiencias.map(a => a.id === editingAudienciaId ? { ...a, ...audienciaFormData } as Audiencia : a));
       showToast('Audiência atualizada com sucesso!');
     } else {
-      const newAudiencia = {
-        ...audienciaFormData,
-        id: currentMs,
-      } as Audiencia;
-      setAudiencias([...audiencias, newAudiencia]);
+      setAudiencias([...audiencias, { ...audienciaFormData, id: currentMs } as Audiencia]);
       showToast('Nova audiência adicionada!', 'success');
     }
     closeAudienciaModal();
@@ -559,56 +554,37 @@ export default function App() {
 
   const handleAddPolicialToAudiencia = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = Number(e.target.value);
-    if (id && !(audienciaFormData.policialIds || []).includes(id)) {
-      setAudienciaFormData({
-        ...audienciaFormData,
-        policialIds: [...(audienciaFormData.policialIds || []), id]
-      });
+    if (id && !audienciaFormData.policialIds?.includes(id)) {
+      setAudienciaFormData(prev => ({ ...prev, policialIds: [...(prev.policialIds || []), id] }));
     }
-    e.target.value = "";
+    e.target.value = '';
   };
 
   const handleRemovePolicialFromAudiencia = (id: number) => {
-    setAudienciaFormData({
-      ...audienciaFormData,
-      policialIds: (audienciaFormData.policialIds || []).filter(pid => pid !== id)
-    });
+    setAudienciaFormData(prev => ({ ...prev, policialIds: (prev.policialIds || []).filter(pid => pid !== id) }));
   };
 
   const handleAudienciaFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('O arquivo excede o limite de 5MB.', 'danger');
-        e.target.value = '';
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        const newPdf = {
-          id: Math.random().toString(36).substring(7),
-          name: file.name,
-          url: base64String
-        };
-        setAudienciaFormData(prev => ({
-          ...prev,
-          pdfs: [...(prev.pdfs || []), newPdf]
-        }));
-      };
-      reader.readAsDataURL(file);
-    } else if (file) {
-      showToast('Por favor, selecione apenas arquivos PDF.', 'danger');
+    if (!file || file.type !== 'application/pdf') {
+      if (file) showToast('Por favor, selecione apenas arquivos PDF.', 'danger');
+      return;
     }
-    // Reset input so the same file can be selected again if needed
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('O arquivo excede o limite de 5MB.', 'danger');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newPdf = { id: Math.random().toString(36).substring(7), name: file.name, url: reader.result as string };
+      setAudienciaFormData(prev => ({ ...prev, pdfs: [...(prev.pdfs || []), newPdf] }));
+    };
+    reader.readAsDataURL(file);
     e.target.value = '';
   };
 
   const handleRemoveAudienciaPdf = (pdfId: string) => {
-    setAudienciaFormData({
-      ...audienciaFormData,
-      pdfs: (audienciaFormData.pdfs || []).filter(p => p.id !== pdfId)
-    });
+    setAudienciaFormData(prev => ({ ...prev, pdfs: (prev.pdfs || []).filter(p => p.id !== pdfId) }));
   };
 
   const handleDeleteAudiencia = async (id: number) => {
