@@ -1,13 +1,1117 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGE - 26º BPM | Sistema de Gestão de Efetivo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slide-in-from-bottom-4 {
+      from { transform: translateY(16px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes slide-in-from-right-8 {
+      from { transform: translateX(32px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .animate-in {
+      animation: fade-in 0.2s ease-out;
+    }
+    
+    .slide-in-from-bottom-4 {
+      animation: slide-in-from-bottom-4 0.3s ease-out;
+    }
+    
+    .slide-in-from-right-8 {
+      animation: slide-in-from-right-8 0.3s ease-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-100">
+  <div id="app"></div>
 
+  <script>
+    // ============================================
+    // DADOS INICIAIS E CONSTANTES
+    // ============================================
+    
+    const PATENTES = [
+      "Sd PM", "Cb PM", "3º Sgt PM", "2º Sgt PM", "1º Sgt PM", 
+      "Subten PM", "Asp Of PM", "2º Ten PM", "1º Ten PM", 
+      "Cap PM", "Maj PM", "Ten Cel PM"
+    ];
+
+    const INITIAL_DATA = [
+      { id: 1, ordem: 1, matricula: "50.123-4", cpf: "111.111.111-11", patente: "Cap PM", nome: "Roberto Almeida da Costa", guerra: "R. Costa", funcao: "Cmte Cia", telefone: "21 99999-1111", status: "Ativo" },
+      { id: 2, ordem: 2, matricula: "61.333-2", cpf: "222.222.222-22", patente: "1º Ten PM", nome: "Fernanda Montenegro Silva", guerra: "Montenegro", funcao: "P/1", telefone: "21 98888-2222", status: "Ativo" },
+      { id: 3, ordem: 3, matricula: "77.444-5", cpf: "333.333.333-33", patente: "Subten PM", nome: "Carlos Eduardo Santos", guerra: "C. Eduardo", funcao: "Sargenteante", telefone: "21 97777-3333", status: "Férias" },
+      { id: 4, ordem: 4, matricula: "88.555-6", cpf: "444.444.444-44", patente: "3º Sgt PM", nome: "Juliana Paes de Oliveira", guerra: "Paes", funcao: "Patrulha", telefone: "21 96666-4444", status: "Licença" },
+      { id: 5, ordem: 5, matricula: "99.111-0", cpf: "555.555.555-55", patente: "Cb PM", nome: "Marcos Vinicius Pereira", guerra: "Vinicius", funcao: "Motorista", telefone: "21 95555-5555", status: "Ativo" },
+      { id: 6, ordem: 6, matricula: "10.222-9", cpf: "666.666.666-66", patente: "Sd PM", nome: "Ana Clara Lima", guerra: "Clara", funcao: "Sentinela", telefone: "21 94444-6666", status: "Afastado" }
+    ];
+
+    const INITIAL_AUDIENCIAS = [
+      { id: 1, data: '2026-04-10', hora: '14:30', local: '1ª Vara Criminal', processo: '0001234-56.2026.8.19.0001', policialIds: [1], status: 'Agendada' },
+      { id: 2, data: '2026-04-12', hora: '09:00', local: 'Auditoria Militar', processo: '0009876-54.2026.8.19.0001', policialIds: [2], status: 'Realizada' }
+    ];
+
+    const getStatusClasses = (status) => {
+      switch (status) {
+        case 'Ativo': return 'bg-green-100 text-green-800';
+        case 'Férias': return 'bg-yellow-100 text-yellow-800';
+        case 'Licença': return 'bg-indigo-100 text-indigo-800';
+        case 'Afastado': return 'bg-red-100 text-red-800';
+        default: return 'bg-slate-100 text-slate-800';
+      }
+    };
+
+    const formatCPF = (cpf) => {
+      return String(cpf).replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+            .replace(/(-\d{2})\d+?$/, '$1');
+    };
+
+    const formatMatricula = (matricula) => {
+      return String(matricula).replace(/(\d{2})(\d)/, '$1.$2')
+                  .replace(/(\d{3})(\d)/, '$1-$2')
+                  .replace(/(-\d)\d+?$/, '$1');
+    };
+
+    const formatBytes = (bytes, decimals = 2) => {
+      if (!+bytes) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+    };
+
+    const getInitials = (name) => {
+      return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+    };
+
+    // ============================================
+    // ESTADO DA APLICAÇÃO
+    // ============================================
+    
+    let appState = {
+      authState: { role: null, user: null },
+      activeAdminTab: 'efetivo',
+      isMobileMenuOpen: false,
+      isSidebarCollapsed: false,
+      members: JSON.parse(JSON.stringify(INITIAL_DATA)),
+      audiencias: JSON.parse(JSON.stringify(INITIAL_AUDIENCIAS)),
+      isLoadingData: false,
+      search: '',
+      debouncedSearch: '',
+      filterStatus: '',
+      sortField: 'ordem',
+      sortAsc: true,
+      isModalOpen: false,
+      editingId: null,
+      formData: { status: 'Ativo' },
+      isAudienciaModalOpen: false,
+      editingAudienciaId: null,
+      audienciaFormData: { status: 'Agendada', policialIds: [] },
+      fichaSearch: '',
+      selectedFichaMemberId: null,
+      activeFichaSection: null,
+      fichaFormData: {},
+      toast: null,
+      isDraggingAnexo: false
+    };
+
+    let searchTimeout = null;
+    let fichaSearchTimeout = null;
+    let toastTimeout = null;
+
+    // ============================================
+    // FUNÇÕES UTILITÁRIAS
+    // ============================================
+
+    function generateId() {
+      return Date.now();
+    }
+
+    function showToast(message, type = 'success') {
+      appState.toast = { message, type };
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        appState.toast = null;
+        render();
+      }, 3000);
+      render();
+    }
+
+    function setDebouncedSearch(value) {
+      appState.search = value;
+      if (searchTimeout) clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        appState.debouncedSearch = value;
+        render();
+      }, 300);
+    }
+
+    function setDebouncedFichaSearch(value) {
+      appState.fichaSearch = value;
+      if (fichaSearchTimeout) clearTimeout(fichaSearchTimeout);
+      fichaSearchTimeout = setTimeout(() => {
+        render();
+      }, 300);
+    }
+
+    // ============================================
+    // FUNÇÕES DE LÓGICA DE NEGÓCIO
+    // ============================================
+
+    function handleLogin(auth) {
+      appState.authState = auth;
+      render();
+    }
+
+    function handleLogout() {
+      appState.authState = { role: null, user: null };
+      appState.activeAdminTab = 'efetivo';
+      appState.selectedFichaMemberId = null;
+      appState.activeFichaSection = null;
+      render();
+    }
+
+    function openModal(member) {
+      if (member) {
+        appState.editingId = member.id;
+        appState.formData = { ...member };
+      } else {
+        appState.editingId = null;
+        appState.formData = { status: 'Ativo' };
+      }
+      appState.isModalOpen = true;
+      render();
+    }
+
+    function closeModal() {
+      appState.isModalOpen = false;
+      appState.formData = { status: 'Ativo' };
+      appState.editingId = null;
+      render();
+    }
+
+    function handleSave(e) {
+      e.preventDefault();
+      const currentMs = generateId();
+      
+      if (appState.editingId) {
+        const newNotification = {
+          id: currentMs.toString(),
+          message: 'Suas informações funcionais foram atualizadas pelo administrador.',
+          date: new Date().toISOString(),
+          read: false
+        };
+        
+        appState.members = appState.members.map(m => 
+          m.id === appState.editingId 
+            ? { ...m, ...appState.formData, notifications: [newNotification, ...(m.notifications || [])] }
+            : m
+        );
+        showToast('Registro atualizado com sucesso!');
+      } else {
+        const newMember = {
+          ...appState.formData,
+          id: currentMs,
+          ordem: appState.members.length + 1
+        };
+        appState.members.push(newMember);
+        showToast('Novo militar adicionado!', 'success');
+      }
+      closeModal();
+    }
+
+    function handleDelete(id) {
+      if (confirm('Tem certeza que deseja remover este registro?')) {
+        appState.members = appState.members.filter(m => m.id !== id);
+        showToast('Registro removido.', 'danger');
+        render();
+      }
+    }
+
+    function handleSort(field) {
+      if (appState.sortField === field) {
+        appState.sortAsc = !appState.sortAsc;
+      } else {
+        appState.sortField = field;
+        appState.sortAsc = true;
+      }
+      render();
+    }
+
+    function openAudienciaModal(audiencia) {
+      if (audiencia) {
+        appState.editingAudienciaId = audiencia.id;
+        appState.audienciaFormData = { ...audiencia };
+      } else {
+        appState.editingAudienciaId = null;
+        appState.audienciaFormData = { status: 'Agendada', policialIds: [] };
+      }
+      appState.isAudienciaModalOpen = true;
+      render();
+    }
+
+    function closeAudienciaModal() {
+      appState.isAudienciaModalOpen = false;
+      appState.audienciaFormData = { status: 'Agendada', policialIds: [] };
+      appState.editingAudienciaId = null;
+      render();
+    }
+
+    function handleSaveAudiencia(e) {
+      e.preventDefault();
+      if (!appState.audienciaFormData.policialIds || appState.audienciaFormData.policialIds.length === 0) {
+        showToast('Selecione pelo menos um policial convocado.', 'danger');
+        return;
+      }
+      
+      const currentMs = generateId();
+      if (appState.editingAudienciaId) {
+        appState.audiencias = appState.audiencias.map(a => 
+          a.id === appState.editingAudienciaId 
+            ? { ...a, ...appState.audienciaFormData }
+            : a
+        );
+        showToast('Audiência atualizada com sucesso!');
+      } else {
+        const newAudiencia = {
+          ...appState.audienciaFormData,
+          id: currentMs
+        };
+        appState.audiencias.push(newAudiencia);
+        showToast('Nova audiência adicionada!', 'success');
+      }
+      closeAudienciaModal();
+    }
+
+    function handleAddPolicialToAudiencia(e) {
+      const id = Number(e.target.value);
+      if (id && !(appState.audienciaFormData.policialIds || []).includes(id)) {
+        appState.audienciaFormData = {
+          ...appState.audienciaFormData,
+          policialIds: [...(appState.audienciaFormData.policialIds || []), id]
+        };
+      }
+      e.target.value = "";
+      render();
+    }
+
+    function handleRemovePolicialFromAudiencia(id) {
+      appState.audienciaFormData = {
+        ...appState.audienciaFormData,
+        policialIds: (appState.audienciaFormData.policialIds || []).filter(pid => pid !== id)
+      };
+      render();
+    }
+
+    function handleDeleteAudiencia(id) {
+      if (confirm('Tem certeza que deseja remover esta audiência?')) {
+        appState.audiencias = appState.audiencias.filter(a => a.id !== id);
+        showToast('Audiência removida.', 'danger');
+        render();
+      }
+    }
+
+    function handleExportCSV() {
+      const filteredAndSortedMembers = getFilteredAndSortedMembers();
+      const headers = ["Ordem", "Matrícula", "Patente", "Nome", "Nome Guerra", "Função", "Status"];
+      const rows = filteredAndSortedMembers.map(m => [
+        m.ordem, m.matricula, m.patente, m.nome, m.guerra, m.funcao, m.status
+      ]);
+      
+      const escapeCSV = (val) => `"${String(val).replace(/"/g, '""')}"`;
+      const csvContent = "\uFEFF" 
+        + headers.map(escapeCSV).join(",") + "\n" 
+        + rows.map(e => e.map(escapeCSV).join(",")).join("\n");
+
+      const link = document.createElement("a");
+      link.setAttribute("href", encodeURI("data:text/csv;charset=utf-8," + csvContent));
+      link.setAttribute("download", "efetivo_26bpm.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
+    function handleImportExcel(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const bstr = evt.target.result;
+          const wb = XLSX.read(bstr, { type: 'binary' });
+          const wsname = wb.SheetNames[0];
+          const ws = wb.Sheets[wsname];
+          const data = XLSX.utils.sheet_to_json(ws);
+
+          if (data.length === 0) {
+            showToast('A planilha parece estar vazia.', 'danger');
+            return;
+          }
+
+          const currentMaxId = appState.members.length > 0 ? Math.max(...appState.members.map(m => m.id)) : 0;
+          let nextIdForNew = currentMaxId + 1;
+
+          const importedMembers = data.map(row => {
+            const findKey = (candidates) => {
+              const key = Object.keys(row).find(k => 
+                candidates.some(c => k.toLowerCase().trim().includes(c.toLowerCase()))
+              );
+              return key ? row[key] : undefined;
+            };
+
+            const statusRaw = findKey(['status', 'situação', 'situacao', 'estado']) || 'Ativo';
+            let status = 'Ativo';
+            const sLower = String(statusRaw).toLowerCase();
+            if (['férias', 'ferias', 'vacation'].some(s => sLower.includes(s))) status = 'Férias';
+            else if (['licença', 'licenca', 'lts'].some(s => sLower.includes(s))) status = 'Licença';
+            else if (['afastado', 'away'].some(s => sLower.includes(s))) status = 'Afastado';
+
+            return {
+              id: 0,
+              ordem: Number(findKey(['ordem', 'nº', 'posicao', 'posição'])) || 0,
+              matricula: String(findKey(['matricula', 'matrícula', 'id', 'registro']) || '').trim(),
+              cpf: String(findKey(['cpf', 'documento']) || '').trim(),
+              patente: String(findKey(['patente', 'grad', 'graduação', 'graduacao', 'posto']) || '').trim(),
+              nome: String(findKey(['nome', 'nome completo', 'policial']) || '').trim(),
+              guerra: String(findKey(['guerra', 'nome de guerra', 'conhecido']) || '').trim(),
+              funcao: String(findKey(['funcao', 'função', 'cargo', 'atribuição']) || '').trim(),
+              telefone: String(findKey(['telefone', 'celular', 'contato']) || '').trim(),
+              email: String(findKey(['email', 'e-mail', 'correio']) || '').trim(),
+              status: status
+            };
+          });
+
+          const updatedMembers = [...appState.members];
+          let importedCount = 0;
+          let updatedCount = 0;
+
+          importedMembers.forEach(newM => {
+            if (!newM.nome || newM.nome === 'undefined' || newM.nome === '') return;
+            
+            const existingIndex = updatedMembers.findIndex(m => 
+              (newM.matricula && m.matricula === newM.matricula) || 
+              (newM.cpf && m.cpf === newM.cpf)
+            );
+
+            if (existingIndex >= 0) {
+              updatedMembers[existingIndex] = { 
+                ...updatedMembers[existingIndex], 
+                ...newM, 
+                id: updatedMembers[existingIndex].id,
+                ordem: newM.ordem || updatedMembers[existingIndex].ordem
+              };
+              updatedCount++;
+            } else {
+              updatedMembers.push({ ...newM, id: nextIdForNew++ });
+              importedCount++;
+            }
+          });
+
+          appState.members = updatedMembers.sort((a, b) => a.ordem - b.ordem);
+          showToast(`${importedCount} novos membros importados e ${updatedCount} atualizados.`, 'success');
+          
+          if (e.target) e.target.value = '';
+          render();
+        } catch (err) {
+          console.error('Erro ao importar Excel:', err);
+          showToast('Erro ao processar o arquivo Excel.', 'danger');
+        }
+      };
+      reader.readAsBinaryString(file);
+    }
+
+    function getFilteredAndSortedMembers() {
+      return appState.members
+        .filter(item => {
+          const searchLower = appState.debouncedSearch.toLowerCase();
+          const matchSearch = item.nome.toLowerCase().includes(searchLower) || 
+                              item.matricula.includes(searchLower) || 
+                              item.funcao.toLowerCase().includes(searchLower);
+          
+          let matchStatus = true;
+          if (appState.filterStatus === 'Ativo') matchStatus = item.status === 'Ativo';
+          if (appState.filterStatus === 'Férias') matchStatus = item.status === 'Férias';
+          if (appState.filterStatus === 'Afastados') matchStatus = item.status === 'Licença' || item.status === 'Afastado';
+
+          return matchSearch && matchStatus;
+        })
+        .sort((a, b) => {
+          const valA = a[appState.sortField];
+          const valB = b[appState.sortField];
+          
+          const strA = typeof valA === 'string' ? valA.toLowerCase() : valA;
+          const strB = typeof valB === 'string' ? valB.toLowerCase() : valB;
+          
+          if (strA < strB) return appState.sortAsc ? -1 : 1;
+          if (strA > strB) return appState.sortAsc ? 1 : -1;
+          return 0;
+        });
+    }
+
+    function getFilteredFichaMembers() {
+      if (!appState.fichaSearch.trim()) return [];
+      
+      const searchLower = appState.fichaSearch.toLowerCase();
+      return appState.members.filter(item => 
+        item.nome.toLowerCase().includes(searchLower) || 
+        item.matricula.includes(searchLower) || 
+        item.id.toString() === searchLower
+      );
+    }
+
+    function handleMarkNotificationsAsRead() {
+      if (appState.authState.user) {
+        appState.members = appState.members.map(m => 
+          m.id === appState.authState.user.id 
+            ? { ...m, notifications: m.notifications?.map(n => ({ ...n, read: true })) }
+            : m
+        );
+        render();
+      }
+    }
+
+    function setActiveTab(tab) {
+      appState.activeAdminTab = tab;
+      if (tab !== 'ficha_individual') {
+        appState.selectedFichaMemberId = null;
+        appState.activeFichaSection = null;
+      }
+      render();
+    }
+
+    function toggleMobileMenu() {
+      appState.isMobileMenuOpen = !appState.isMobileMenuOpen;
+      render();
+    }
+
+    function setFilterStatus(status) {
+      appState.filterStatus = status;
+      render();
+    }
+
+    function selectFichaMember(id) {
+      appState.selectedFichaMemberId = id;
+      appState.activeAdminTab = 'ficha_individual';
+      appState.activeFichaSection = null;
+      render();
+    }
+
+    function setActiveFichaSection(section) {
+      appState.activeFichaSection = section;
+      if (section === 'Dados Principais' && appState.selectedFichaMemberId) {
+        const member = appState.members.find(m => m.id === appState.selectedFichaMemberId);
+        if (member) {
+          appState.fichaFormData = { ...member };
+        }
+      }
+      render();
+    }
+
+    function updateFichaFormData(field, value) {
+      if (!appState.fichaFormData) appState.fichaFormData = {};
+      appState.fichaFormData[field] = value;
+    }
+
+    function saveFichaData() {
+      if (appState.selectedFichaMemberId && appState.fichaFormData) {
+        const currentMs = generateId();
+        const newNotification = {
+          id: currentMs.toString(),
+          message: 'Sua ficha individual (Dados Principais) foi atualizada pelo administrador.',
+          date: new Date().toISOString(),
+          read: false
+        };
+        
+        appState.members = appState.members.map(m => 
+          m.id === appState.selectedFichaMemberId 
+            ? { ...m, ...appState.fichaFormData, notifications: [newNotification, ...(m.notifications || [])] }
+            : m
+        );
+        showToast('Dados Principais atualizados com sucesso!', 'success');
+      }
+    }
+
+    function setupFormEventListeners() {
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => setDebouncedSearch(e.target.value));
+      }
+
+      const fichaSearchInput = document.getElementById('ficha-search-input');
+      if (fichaSearchInput) {
+        fichaSearchInput.addEventListener('input', (e) => setDebouncedFichaSearch(e.target.value));
+      }
+
+      const excelInput = document.getElementById('excel-input');
+      if (excelInput) {
+        excelInput.addEventListener('change', handleImportExcel);
+      }
+    }
+
+    // ============================================
+    // FUNÇÕES DE RENDERIZAÇÃO
+    // ============================================
+
+    function renderLoginScreen() {
+      const container = document.getElementById('app');
+      container.innerHTML = `
+        <div class="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+          <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div class="bg-blue-600 p-6 text-center">
+              <h1 class="text-2xl font-bold text-white flex items-center justify-center gap-2">
+                <span class="bg-white text-blue-600 px-2 py-1 rounded-md text-sm">26º BPM</span>
+                SGE
+              </h1>
+              <p class="text-blue-100 mt-2 text-sm">Sistema de Gestão de Efetivo</p>
+            </div>
+
+            <div class="flex border-b border-slate-200">
+              <button id="btn-login-user" class="flex-1 py-3 text-sm font-medium transition-colors border-b-2 border-blue-600 text-blue-600">
+                Acesso Individual
+              </button>
+              <button id="btn-login-admin" class="flex-1 py-3 text-sm font-medium transition-colors text-slate-500 hover:text-slate-700">
+                Administrador
+              </button>
+            </div>
+
+            <div class="p-6">
+              <div id="login-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm text-center"></div>
+
+              <form id="user-login-form" class="flex flex-col gap-4">
+                <div>
+                  <label for="login-cpf" class="block text-sm font-medium text-slate-700 mb-1">CPF</label>
+                  <input id="login-cpf" type="text" required placeholder="Ex: 111.111.111-11" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                </div>
+                <div>
+                  <label for="login-mat" class="block text-sm font-medium text-slate-700 mb-1">Matrícula</label>
+                  <input id="login-mat" type="text" required placeholder="Ex: 50.123-4" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                </div>
+                <button type="submit" class="w-full mt-2 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-medium transition-colors">Entrar</button>
+              </form>
+
+              <form id="admin-login-form" class="hidden flex flex-col gap-4">
+                <div>
+                  <label for="admin-usr" class="block text-sm font-medium text-slate-700 mb-1">Usuário</label>
+                  <input id="admin-usr" type="text" required placeholder="admin" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                </div>
+                <div>
+                  <label for="admin-pwd" class="block text-sm font-medium text-slate-700 mb-1">Senha</label>
+                  <input id="admin-pwd" type="password" required placeholder="admin" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                </div>
+                <button type="submit" class="w-full mt-2 bg-slate-800 text-white py-2 rounded-md hover:bg-slate-900 font-medium transition-colors">Entrar como Admin</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
+
+      let loginType = 'USER';
+      
+      document.getElementById('btn-login-user').addEventListener('click', () => {
+        loginType = 'USER';
+        document.getElementById('btn-login-user').className = 'flex-1 py-3 text-sm font-medium transition-colors border-b-2 border-blue-600 text-blue-600';
+        document.getElementById('btn-login-admin').className = 'flex-1 py-3 text-sm font-medium transition-colors text-slate-500 hover:text-slate-700';
+        document.getElementById('user-login-form').classList.remove('hidden');
+        document.getElementById('admin-login-form').classList.add('hidden');
+        document.getElementById('login-error').classList.add('hidden');
+      });
+
+      document.getElementById('btn-login-admin').addEventListener('click', () => {
+        loginType = 'ADMIN';
+        document.getElementById('btn-login-admin').className = 'flex-1 py-3 text-sm font-medium transition-colors border-b-2 border-blue-600 text-blue-600';
+        document.getElementById('btn-login-user').className = 'flex-1 py-3 text-sm font-medium transition-colors text-slate-500 hover:text-slate-700';
+        document.getElementById('admin-login-form').classList.remove('hidden');
+        document.getElementById('user-login-form').classList.add('hidden');
+        document.getElementById('login-error').classList.add('hidden');
+      });
+
+      document.getElementById('user-login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const cpf = document.getElementById('login-cpf').value;
+        const matricula = document.getElementById('login-mat').value;
+        const member = appState.members.find(m => m.cpf === cpf && m.matricula === matricula);
+        if (member) {
+          handleLogin({ role: 'USER', user: member });
+        } else {
+          const errorEl = document.getElementById('login-error');
+          errorEl.textContent = 'CPF ou Matrícula incorretos.';
+          errorEl.classList.remove('hidden');
+        }
+      });
+
+      document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const adminUser = document.getElementById('admin-usr').value;
+        const adminPass = document.getElementById('admin-pwd').value;
+        if (adminUser === 'admin' && adminPass === 'admin') {
+          handleLogin({ role: 'ADMIN' });
+        } else {
+          const errorEl = document.getElementById('login-error');
+          errorEl.textContent = 'Usuário ou senha incorretos.';
+          errorEl.classList.remove('hidden');
+        }
+      });
+
+      lucide.createIcons();
+    }
+
+    function renderUserDashboard() {
+      const user = appState.members.find(m => m.id === appState.authState.user?.id) || appState.authState.user;
+      if (!user) {
+        handleLogout();
+        return;
+      }
+
+      const unreadCount = user.notifications?.filter(n => !n.read).length || 0;
+      const userAudiencias = appState.audiencias.filter(a => a.policialIds?.includes(user.id));
+      const upcomingAudiencias = userAudiencias.filter(a => new Date(a.data + 'T' + a.hora) >= new Date())
+        .sort((a, b) => new Date(a.data + 'T' + a.hora).getTime() - new Date(b.data + 'T' + b.hora).getTime());
+      const nextAudiencia = upcomingAudiencias.length > 0 ? upcomingAudiencias[0] : null;
+
+      const container = document.getElementById('app');
+      container.innerHTML = `
+        <div class="min-h-screen bg-slate-100 p-4 md:p-6 flex flex-col items-center font-sans">
+          <header class="w-full max-w-6xl flex justify-between items-center mb-8 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center gap-3 text-xl font-bold text-slate-900">
+              <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-inner">
+                <i data-lucide="shield-alert" class="w-6 h-6"></i>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-sm text-slate-500 font-medium leading-tight">26º BPM</span>
+                <span class="leading-tight">Portal do Policial</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="relative">
+                <button id="btn-notifications" class="relative p-2.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
+                  <i data-lucide="bell" class="w-5 h-5"></i>
+                  ${unreadCount > 0 ? '<span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>' : ''}
+                </button>
+              </div>
+              <button id="btn-logout" onclick="handleLogout()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i> Sair
+              </button>
+            </div>
+          </header>
+
+          <div class="w-full max-w-6xl flex flex-col gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 text-white shadow-md flex flex-col justify-between">
+                <div>
+                  <p class="text-blue-200 text-sm font-medium mb-1">Bem-vindo de volta,</p>
+                  <h2 class="text-2xl font-bold">${user.patente} ${user.guerra}</h2>
+                </div>
+                <div class="mt-4 flex items-center gap-2">
+                  <span class="flex h-3 w-3 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                  </span>
+                  <span class="text-sm font-medium text-blue-100">Sistema Online</span>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                  <i data-lucide="scale" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-slate-500 font-medium mb-0.5">Próxima Audiência</p>
+                  ${nextAudiencia ? `
+                    <div>
+                      <p class="text-slate-900 font-bold">${new Date(nextAudiencia.data).toLocaleDateString('pt-BR')} às ${nextAudiencia.hora}</p>
+                      <p class="text-xs text-slate-500 truncate max-w-[180px]">${nextAudiencia.local}</p>
+                    </div>
+                  ` : '<p class="text-slate-900 font-bold">Nenhuma agendada</p>'}
+                </div>
+              </div>
+
+              <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                  <i data-lucide="paperclip" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-slate-500 font-medium mb-0.5">Documentos Anexos</p>
+                  <p class="text-2xl text-slate-900 font-bold">${user.anexos?.length || 0}</p>
+                  <p class="text-xs text-slate-500">Na sua ficha individual</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      lucide.createIcons();
+    }
+
+    function renderAdminDashboard() {
+      const stats = {
+        total: appState.members.length,
+        active: appState.members.filter(d => d.status === 'Ativo').length,
+        vacation: appState.members.filter(d => d.status === 'Férias').length,
+        away: appState.members.filter(d => ['Licença', 'Afastado'].includes(d.status)).length
+      };
+
+      const filteredAndSortedMembers = getFilteredAndSortedMembers();
+      const filteredFichaMembers = getFilteredFichaMembers();
+      const uniqueFuncoes = [...new Set(appState.members.map(m => m.funcao))].sort();
+
+      const container = document.getElementById('app');
+      container.innerHTML = `
+        <div class="flex h-screen w-full bg-slate-100 overflow-hidden font-sans text-slate-900">
+          <!-- Main Content -->
+          <main class="flex-1 flex flex-col h-full overflow-hidden relative bg-slate-100">
+            <!-- Top Header -->
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0">
+              <div class="flex items-center gap-3">
+                <h2 class="text-lg md:text-xl font-bold text-slate-800 truncate">
+                  ${appState.activeAdminTab === 'efetivo' ? 'Controle de Efetivo' : 
+                    appState.activeAdminTab === 'audiencias' ? 'Gestão de Audiências' :
+                    appState.activeAdminTab === 'administrativo' ? 'Módulo Administrativo' :
+                    appState.activeAdminTab === 'ficha_individual' ? 'Ficha Individual' :
+                    'Configurações do Sistema'}
+                </h2>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="font-semibold text-slate-500 hidden sm:block">
+                  ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+                <div class="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold" title="Administrador">AD</div>
+              </div>
+            </header>
+
+            <!-- Content Area -->
+            ${renderAdminTabContent(stats, filteredAndSortedMembers, filteredFichaMembers, uniqueFuncoes)}
+          </main>
+
+          <!-- Toast -->
+          ${appState.toast ? `
+            <div class="fixed bottom-6 right-6 z-50 animate-in slide-in-from-right-8 fade-in duration-300">
+              <div class="flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white font-medium ${appState.toast.type === 'success' ? 'bg-slate-800' : 'bg-red-600'}">
+                <i data-lucide="${appState.toast.type === 'success' ? 'check-circle' : 'trash-2'}" class="w-5 h-5 ${appState.toast.type === 'success' ? 'text-green-400' : ''}"></i>
+                ${appState.toast.message}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      setupFormEventListeners();
+      lucide.createIcons();
+    }
+
+    function renderAdminTabContent(stats, filteredAndSortedMembers, filteredFichaMembers, uniqueFuncoes) {
+      if (appState.activeAdminTab === 'efetivo') {
+        return `
+          <div class="flex-1 flex flex-col p-2 sm:p-4 md:p-6 overflow-hidden">
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-2 md:mb-4 shrink-0">
+              <button onclick="setFilterStatus('')" class="bg-white p-2 md:p-5 rounded-lg shadow-sm border flex flex-col text-left transition-all ${appState.filterStatus === '' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'}">
+                <i data-lucide="users" class="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-slate-700"></i>
+                <div class="text-lg md:text-3xl font-bold text-slate-900 leading-tight md:leading-normal">${stats.total}</div>
+                <div class="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Efetivo Total</div>
+              </button>
+              <button onclick="setFilterStatus('Ativo')" class="bg-white p-2 md:p-5 rounded-lg shadow-sm border-x border-t border-b-2 md:border-b-4 border-b-green-500 flex flex-col text-left transition-all ${appState.filterStatus === 'Ativo' ? 'border-x-green-500 border-t-green-500 ring-2 ring-green-500/20 bg-green-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}">
+                <i data-lucide="check-circle" class="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-green-500"></i>
+                <div class="text-lg md:text-3xl font-bold text-green-600 leading-tight md:leading-normal">${stats.active}</div>
+                <div class="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Pronto Emprego</div>
+              </button>
+              <button onclick="setFilterStatus('Férias')" class="bg-white p-2 md:p-5 rounded-lg shadow-sm border-x border-t border-b-2 md:border-b-4 border-b-yellow-500 flex flex-col text-left transition-all ${appState.filterStatus === 'Férias' ? 'border-x-yellow-500 border-t-yellow-500 ring-2 ring-yellow-500/20 bg-yellow-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}">
+                <i data-lucide="sun" class="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-yellow-500"></i>
+                <div class="text-lg md:text-3xl font-bold text-yellow-600 leading-tight md:leading-normal">${stats.vacation}</div>
+                <div class="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">Férias</div>
+              </button>
+              <button onclick="setFilterStatus('Afastados')" class="bg-white p-2 md:p-5 rounded-lg shadow-sm border-x border-t border-b-2 md:border-b-4 border-b-red-500 flex flex-col text-left transition-all ${appState.filterStatus === 'Afastados' ? 'border-x-red-500 border-t-red-500 ring-2 ring-red-500/20 bg-red-50/50' : 'border-x-slate-200 border-t-slate-200 hover:bg-slate-50'}">
+                <i data-lucide="activity" class="w-4 h-4 md:w-7 md:h-7 mb-1 md:mb-2 text-red-500"></i>
+                <div class="text-lg md:text-3xl font-bold text-red-600 leading-tight md:leading-normal">${stats.away}</div>
+                <div class="text-[9px] md:text-xs text-slate-500 uppercase tracking-wide font-semibold mt-0.5 md:mt-1">LTS / Afastados</div>
+              </button>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="bg-white p-2 sm:p-3 md:p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row gap-2 items-center mb-2 md:mb-4 shrink-0">
+              <div class="relative flex-1 w-full md:w-auto">
+                <i data-lucide="search" class="w-4 h-4 md:w-5 md:h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input id="search-input" type="text" placeholder="Buscar por nome, matrícula, função..." class="w-full pl-9 pr-3 py-1.5 md:pl-10 md:pr-4 md:py-2 text-sm md:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" value="${appState.search}" />
+              </div>
+
+              <div class="flex gap-2 w-full md:w-auto">
+                <input id="excel-input" type="file" accept=".xlsx, .xls" class="hidden" />
+                <button onclick="document.getElementById('excel-input').click()" class="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium text-xs md:text-sm transition-colors">
+                  <i data-lucide="upload" class="w-4 h-4"></i> Importar
+                </button>
+                <button onclick="handleExportCSV()" class="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium text-xs md:text-sm transition-colors">
+                  <i data-lucide="download" class="w-4 h-4"></i> Exportar
+                </button>
+                <button onclick="openModal()" class="flex-1 md:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-xs md:text-sm transition-colors">
+                  <i data-lucide="plus" class="w-4 h-4"></i> Novo Membro
+                </button>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 flex-1 overflow-hidden flex flex-col min-h-0">
+              <div class="overflow-auto flex-1">
+                <table class="w-full border-collapse text-sm whitespace-nowrap">
+                  <thead class="bg-slate-50 sticky top-0 z-10">
+                    <tr>
+                      <th onclick="handleSort('ordem')" class="hidden md:table-cell px-2 py-2 md:px-4 md:py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors">
+                        <div class="flex items-center gap-1 text-xs md:text-sm">Ordem <i data-lucide="arrow-up-down" class="w-3 h-3 opacity-50"></i></div>
+                      </th>
+                      <th onclick="handleSort('matricula')" class="hidden md:table-cell px-2 py-2 md:px-4 md:py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors">
+                        <div class="flex items-center gap-1 text-xs md:text-sm">Matrícula <i data-lucide="arrow-up-down" class="w-3 h-3 opacity-50"></i></div>
+                      </th>
+                      <th onclick="handleSort('patente')" class="px-2 py-2 md:px-4 md:py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors">
+                        <div class="flex items-center gap-1 text-xs md:text-sm">Patente <i data-lucide="arrow-up-down" class="w-3 h-3 opacity-50"></i></div>
+                      </th>
+                      <th onclick="handleSort('nome')" class="px-2 py-2 md:px-4 md:py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors">
+                        <div class="flex items-center gap-1 text-xs md:text-sm">Nome <i data-lucide="arrow-up-down" class="w-3 h-3 opacity-50"></i></div>
+                      </th>
+                      <th onclick="handleSort('funcao')" class="hidden md:table-cell px-2 py-2 md:px-4 md:py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors">
+                        <div class="flex items-center gap-1 text-xs md:text-sm">Função <i data-lucide="arrow-up-down" class="w-3 h-3 opacity-50"></i></div>
+                      </th>
+                      <th onclick="handleSort('status')" class="px-2 py-2 md:px-4 md:py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors">
+                        <div class="flex items-center gap-1 text-xs md:text-sm">Status <i data-lucide="arrow-up-down" class="w-3 h-3 opacity-50"></i></div>
+                      </th>
+                      <th class="px-2 py-2 md:px-4 md:py-3 text-right font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 text-xs md:text-sm">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${filteredAndSortedMembers.length > 0 ? 
+                      filteredAndSortedMembers.map(item => `
+                        <tr onclick="selectFichaMember(${item.id})" class="hover:bg-slate-50 transition-colors group cursor-pointer text-xs md:text-sm">
+                          <td class="hidden md:table-cell px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-slate-500 font-mono">#${item.ordem}</td>
+                          <td class="hidden md:table-cell px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 font-medium text-slate-900">${formatMatricula(item.matricula)}</td>
+                          <td class="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-slate-700">${item.patente}</td>
+                          <td class="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100">
+                            <div class="flex items-center gap-2 md:gap-3">
+                              <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] md:text-xs font-bold shrink-0 overflow-hidden">
+                                ${getInitials(item.nome)}
+                              </div>
+                              <div>
+                                <div class="font-semibold text-slate-900">${item.nome}</div>
+                                <div class="text-xs text-slate-500">${item.guerra}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="hidden md:table-cell px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-slate-700">${item.funcao}</td>
+                          <td class="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100">
+                            <span class="px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-[10px] md:text-xs font-semibold uppercase tracking-wide ${getStatusClasses(item.status)}">${item.status}</span>
+                          </td>
+                          <td class="px-2 py-2 md:px-4 md:py-3 border-b border-slate-100 text-right">
+                            <button onclick="event.stopPropagation(); openModal(${item.id})" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1">
+                              <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); handleDelete(${item.id})" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                              <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      `).join('') : 
+                      '<tr><td colspan="7" class="px-4 py-16 text-center text-slate-500"><div class="flex flex-col items-center justify-center"><i data-lucide="folder-open" class="w-12 h-12 text-slate-300 mb-3"></i><p class="text-base">Nenhum registro encontrado.</p></div></td></tr>'
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (appState.activeAdminTab === 'configuracoes') {
+        return `
+          <div class="flex-1 overflow-auto p-4 md:p-6 bg-slate-50">
+            <div class="max-w-4xl mx-auto space-y-8 text-left">
+              <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
+                <div class="mb-8 border-b border-slate-100 pb-4">
+                  <span class="text-blue-800 bg-blue-100 px-3 py-1 rounded-full text-sm font-medium mb-4 inline-block">Guia de Estilos</span>
+                  <p class="text-gray-600">Padrões visuais, hierarquia de texto e tokens de design adotados pelo sistema.</p>
+                </div>
+                <div class="space-y-6">
+                  <div class="p-6 bg-slate-50 rounded-lg border border-slate-100">
+                    <span class="text-xs font-mono text-slate-400 uppercase tracking-widest mb-4 block">Hierarquia de Títulos</span>
+                    <div class="space-y-4">
+                      <h1 class="text-2xl font-bold text-slate-900 border-l-4 border-blue-600 pl-3">Dashboard</h1>
+                      <div class="pl-4 space-y-4">
+                        <h2 class="text-xl font-semibold text-slate-800">Resumo</h2>
+                        <div class="pl-4">
+                          <h3 class="text-lg font-medium text-slate-700">Detalhes</h3>
+                          <p class="text-gray-600 mt-2 text-sm max-w-lg">O uso das tags semânticas corretas garante acessibilidade e organização.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (appState.activeAdminTab === 'administrativo') {
+        return `
+          <div class="flex-1 overflow-auto p-4 md:p-6">
+            <h3 class="text-lg font-medium text-slate-900 mb-4">Módulo Administrativo</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+              <button onclick="setActiveTab('ficha_individual')" class="bg-white p-4 md:p-8 rounded-lg border border-slate-200 flex flex-col items-center justify-center gap-2 md:gap-4 hover:bg-slate-50 hover:border-blue-300 hover:shadow-md transition-all group">
+                <div class="w-10 h-10 md:w-16 md:h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <i data-lucide="file-text" class="w-5 h-5 md:w-8 md:h-8"></i>
+                </div>
+                <span class="font-medium text-slate-800 text-sm md:text-lg">Ficha Individual</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      if (appState.activeAdminTab === 'ficha_individual') {
+        const member = appState.selectedFichaMemberId ? appState.members.find(m => m.id === appState.selectedFichaMemberId) : null;
+        
+        if (!member) {
+          return `
+            <div class="flex-1 overflow-auto p-4 md:p-6 flex flex-col gap-4">
+              <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row gap-3 items-center shrink-0">
+                <div class="flex items-center gap-3 text-slate-800 font-semibold flex-1">
+                  <button onclick="setActiveTab('administrativo')" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                  </button>
+                  <span>Ficha Individual</span>
+                </div>
+                <div class="relative flex-1 md:w-auto md:min-w-[300px]">
+                  <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                  <input id="ficha-search-input" type="text" placeholder="Buscar por nome, matrícula ou ID..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white text-slate-900" value="${appState.fichaSearch}" />
+                </div>
+              </div>
+              <div class="bg-white flex-1 min-h-[400px] rounded-lg border border-slate-200 flex flex-col items-center justify-center text-slate-500 p-8 shadow-sm">
+                <i data-lucide="file-text" class="w-16 h-16 text-slate-300 mb-4"></i>
+                <h3 class="text-xl font-medium text-slate-900 mb-2">Ficha Individual</h3>
+                <p class="text-center max-w-md">Utilize a busca acima para encontrar um policial.</p>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="flex-1 overflow-auto p-4 md:p-6 flex flex-col gap-4">
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-3 shrink-0">
+              <button onclick="setActiveTab('administrativo'); appState.selectedFichaMemberId = null;" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+              </button>
+              <span class="font-semibold">${member.patente} ${member.nome}</span>
+            </div>
+            <div class="bg-white flex-1 rounded-lg border border-slate-200 p-6 shadow-sm">
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                <button onclick="setActiveFichaSection('Dados Principais')" class="bg-slate-50 border border-slate-200 rounded-lg p-3 md:p-4 flex flex-col items-center justify-center gap-2 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors">
+                  <i data-lucide="user" class="w-5 h-5 md:w-8 md:h-8 text-slate-400"></i>
+                  <span class="text-[10px] md:text-sm font-medium text-center">Dados Principais</span>
+                </button>
+                <button onclick="window.print()" class="bg-blue-600 border border-blue-700 rounded-lg p-3 md:p-4 flex flex-col items-center justify-center gap-2 hover:bg-blue-700 text-white transition-colors">
+                  <i data-lucide="printer" class="w-5 h-5 md:w-8 md:h-8"></i>
+                  <span class="text-[10px] md:text-sm font-medium">Gerar Ficha</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      return '';
+    }
+
+    // ============================================
+    // FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO
+    // ============================================
+
+    function render() {
+      if (appState.isLoadingData) {
+        const container = document.getElementById('app');
+        container.innerHTML = `
+          <div class="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
+            <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <h2 class="text-xl font-semibold text-slate-700">Carregando dados...</h2>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      if (appState.authState.role === null) {
+        renderLoginScreen();
+      } else if (appState.authState.role === 'USER') {
+        renderUserDashboard();
+      } else if (appState.authState.role === 'ADMIN') {
+        renderAdminDashboard();
+      }
+    }
+
+    // ============================================
+    // INICIALIZAÇÃO
+    // ============================================
+
+    document.addEventListener('DOMContentLoaded', () => {
+      render();
+      
+      setInterval(() => {
+        if (appState.authState.role === 'ADMIN') {
+          render();
+        }
+      }, 1000);
+    });
+
+    // Expose functions globally
+    window.handleLogout = handleLogout;
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.handleDelete = handleDelete;
+    window.handleSort = handleSort;
+    window.handleExportCSV = handleExportCSV;
+    window.setActiveTab = setActiveTab;
+    window.setFilterStatus = setFilterStatus;
+    window.selectFichaMember = selectFichaMember;
+    window.setActiveFichaSection = setActiveFichaSection;
+    window.updateFichaFormData = updateFichaFormData;
+    window.saveFichaData = saveFichaData;
+  </script>
+</body>
+</html>
