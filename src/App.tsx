@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase } from './lib/supabase';
-import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, FileUp, Settings, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, FileSpreadsheet, File, Upload, UploadCloud, ArrowRightLeft } from 'lucide-react';
+import { Search, Download, Plus, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, Settings, Menu, ChevronLeft, ChevronRight, Upload, ArrowRightLeft, Scale, Briefcase } from 'lucide-react';
 
 import Clock from './components/Clock';
 
-import { Status, Notification, Anexo, Member, Audiencia, AuthState } from './types';
+import { Status, Member, Audiencia, AuthState, Notification as AppNotification } from './types';
 import UserDashboard from './components/UserDashboard';
-import { INITIAL_DATA, INITIAL_AUDIENCIAS, PATENTES, formatBytes } from './utils/constants';
+import { INITIAL_DATA, INITIAL_AUDIENCIAS, PATENTES } from './utils/constants';
 import { MemberRow } from './components/efetivo/MemberRow';
 import { usePrefetch } from './hooks/usePrefetch';
 
 const AudienciasPage = lazy(() => import('./pages/AudienciasPage'));
+const FichaIndividualPage = lazy(() => import('./pages/FichaIndividualPage'));
 
 const PageSkeleton = () => (
   <div className="animate-pulse p-6 space-y-4">
@@ -121,18 +122,7 @@ export default function App() {
   const [editingAudienciaId, setEditingAudienciaId] = useState<number | null>(null);
   const [audienciaFormData, setAudienciaFormData] = useState<Partial<Audiencia>>({ status: 'Agendada' });
   
-  const [fichaSearch, setFichaSearch] = useState('');
-  const [debouncedFichaSearch, setDebouncedFichaSearch] = useState('');
-  
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedFichaSearch(fichaSearch), 300);
-    return () => clearTimeout(timer);
-  }, [fichaSearch]);
-
   const [selectedFichaMemberId, setSelectedFichaMemberId] = useState<number | null>(null);
-  const [activeFichaSection, setActiveFichaSection] = useState<string | null>(null);
-  const [fichaFormData, setFichaFormData] = useState<Partial<Member>>({});
-  const [isDraggingAnexo, setIsDraggingAnexo] = useState(false);
 
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'danger' } | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -145,219 +135,6 @@ export default function App() {
     }
     toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
   };
-
-  useEffect(() => {
-    if (activeFichaSection === 'Dados Principais' && selectedFichaMemberId) {
-      const member = members.find(m => m.id === selectedFichaMemberId);
-      if (member) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setFichaFormData({
-          guerra: member.guerra || '',
-          patente: member.patente || '',
-          nome: member.nome || '',
-          matricula: member.matricula || '',
-          status: member.status || 'Ativo',
-          quadro: member.quadro || '',
-          rgMilitar: member.rgMilitar || '',
-          dataEmissaoRg: member.dataEmissaoRg || '',
-          comportamento: member.comportamento || 'Bom',
-          cpf: member.cpf || '',
-          vinculo: member.vinculo || '',
-          dataNascimento: member.dataNascimento || '',
-          cidadeNascimento: member.cidadeNascimento || '',
-          ufNascimento: member.ufNascimento || '',
-          pasep: member.pasep || '',
-          regCivil: member.regCivil || '',
-          pai: member.pai || '',
-          mae: member.mae || '',
-          tipoSanguineo: member.tipoSanguineo || '',
-          fatorRh: member.fatorRh || '',
-          dataInclusao: member.dataInclusao || '',
-        });
-      }
-    }
-  }, [activeFichaSection, selectedFichaMemberId, members]);
-
-  const handleSaveFicha = () => {
-    if (selectedFichaMemberId) {
-      const currentMs = new Date().getTime();
-      const newNotification: Notification = {
-        id: currentMs.toString(),
-        message: 'Sua ficha individual (Dados Principais) foi atualizada pelo administrador.',
-        date: new Date().toISOString(),
-        read: false
-      };
-      setMembers(members.map(m => 
-        m.id === selectedFichaMemberId 
-          ? { ...m, ...fichaFormData, notifications: [newNotification, ...(m.notifications || [])] } 
-          : m
-      ));
-      showToast('Dados Principais atualizados com sucesso!', 'success');
-    }
-  };
-
-  const processAnexoFiles = async (files: FileList | File[]) => {
-    if (!selectedFichaMemberId) return;
-    const member = members.find(m => m.id === selectedFichaMemberId);
-    if (!member) return;
-
-    const validFiles = Array.from(files).filter(file => {
-      // Limit to 5MB per file to avoid localStorage/Base64 issues
-      if (file.size > 5 * 1024 * 1024) {
-        showToast(`O arquivo ${file.name} excede o limite de 5MB.`, 'danger');
-        return false;
-      }
-      return true;
-    });
-
-    if (validFiles.length === 0) return;
-
-    try {
-      const newAnexos = await Promise.all(
-        validFiles.map((file: File) => {
-          return new Promise<Anexo>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const base64String = reader.result as string;
-              resolve({
-                id: crypto.randomUUID(),
-                name: file.name,
-                url: base64String,
-                type: file.type || 'application/octet-stream',
-                date: new Date().toISOString(),
-                size: file.size
-              });
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
-        })
-      );
-
-      const currentMs = new Date().getTime();
-      const newNotification: Notification = {
-        id: currentMs.toString(),
-        message: 'Novos anexos foram adicionados à sua ficha.',
-        date: new Date().toISOString(),
-        read: false
-      };
-      
-      setMembers(prevMembers => prevMembers.map(m => 
-        m.id === selectedFichaMemberId 
-          ? { 
-              ...m, 
-              anexos: [...(m.anexos || []), ...newAnexos],
-              notifications: [newNotification, ...(m.notifications || [])]
-            } 
-          : m
-      ));
-      showToast('Anexos importados com sucesso!', 'success');
-    } catch (error) {
-      console.error('Erro ao processar anexos:', error);
-      showToast('Ocorreu um erro ao processar os arquivos.', 'danger');
-    }
-  };
-
-  const handleUploadAnexo = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      processAnexoFiles(e.target.files);
-    }
-    e.target.value = ''; // Reset input
-  };
-
-  const handleDragOverAnexo = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingAnexo(true);
-  };
-
-  const handleDragLeaveAnexo = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingAnexo(false);
-  };
-
-  const handleDropAnexo = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingAnexo(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      processAnexoFiles(e.dataTransfer.files);
-    }
-  };
-
-  const handleRemoveAnexo = (anexoId: string) => {
-    if (!selectedFichaMemberId) return;
-    if (window.confirm('Tem certeza que deseja remover este anexo?')) {
-      setMembers(members.map(m => 
-        m.id === selectedFichaMemberId 
-          ? { ...m, anexos: (m.anexos || []).filter(a => a.id !== anexoId) } 
-          : m
-      ));
-      showToast('Anexo removido.', 'danger');
-    }
-  };
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, memberId: number) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        const newNotification: Notification = {
-          id: crypto.randomUUID(),
-          message: 'Sua foto de perfil foi atualizada.',
-          date: new Date().toISOString(),
-          read: false
-        };
-        setMembers(members.map(m => 
-          m.id === memberId 
-            ? { ...m, photoUrl: base64String, notifications: [newNotification, ...(m.notifications || [])] } 
-            : m
-        ));
-        showToast('Foto atualizada com sucesso!', 'success');
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const uniqueFuncoes = useMemo(() => [...new Set(members.map(m => m.funcao))].sort(), [members]);
-
-  const filteredFichaMembers = useMemo(() => {
-    if (!debouncedFichaSearch.trim()) return [];
-    
-    const searchLower = debouncedFichaSearch.toLowerCase();
-    return members.filter(item => 
-      item.nome.toLowerCase().includes(searchLower) || 
-      item.matricula.includes(searchLower) || 
-      item.id.toString() === searchLower
-    );
-  }, [members, debouncedFichaSearch]);
-
-  const filteredAndSortedMembers = useMemo(() => {
-    return members
-      .filter(item => {
-        const searchLower = debouncedSearch.toLowerCase();
-        const matchSearch = item.nome.toLowerCase().includes(searchLower) || 
-                            item.matricula.includes(searchLower) || 
-                            item.funcao.toLowerCase().includes(searchLower);
-        
-        let matchStatus = true;
-        if (filterStatus === 'Ativo') matchStatus = item.status === 'Ativo';
-        if (filterStatus === 'Férias') matchStatus = item.status === 'Férias';
-        if (filterStatus === 'Afastados') matchStatus = item.status === 'Licença' || item.status === 'Afastado';
-
-        return matchSearch && matchStatus;
-      })
-      .sort((a, b) => {
-        const valA = a[sortField];
-        const valB = b[sortField];
-        
-        const strA = typeof valA === 'string' ? valA.toLowerCase() : valA;
-        const strB = typeof valB === 'string' ? valB.toLowerCase() : valB;
-        
-        if (strA < strB) return sortAsc ? -1 : 1;
-        if (strA > strB) return sortAsc ? 1 : -1;
-        return 0;
-      });
-  }, [members, debouncedSearch, filterStatus, sortField, sortAsc]);
 
   const handleSort = (field: keyof Member) => {
     if (sortField === field) {
@@ -499,7 +276,7 @@ export default function App() {
     e.preventDefault();
     const currentMs = new Date().getTime();
     if (editingId) {
-      const newNotification: Notification = {
+      const newNotification: AppNotification = {
         id: currentMs.toString(),
         message: 'Suas informações funcionais foram atualizadas pelo administrador.',
         date: new Date().toISOString(),
@@ -547,6 +324,34 @@ export default function App() {
     setAudienciaFormData({ status: 'Agendada', policialIds: [] });
     setEditingAudienciaId(null);
   };
+
+  const uniqueFuncoes = useMemo(() => [...new Set(members.map(m => m.funcao))].sort(), [members]);
+
+  const filteredAndSortedMembers = members
+    .filter(item => {
+      const searchLower = debouncedSearch.toLowerCase();
+      const matchSearch = item.nome.toLowerCase().includes(searchLower) || 
+                          item.matricula.includes(searchLower) || 
+                          item.funcao.toLowerCase().includes(searchLower);
+      
+      let matchStatus = true;
+      if (filterStatus === 'Ativo') matchStatus = item.status === 'Ativo';
+      if (filterStatus === 'Férias') matchStatus = item.status === 'Férias';
+      if (filterStatus === 'Afastados') matchStatus = item.status === 'Licença' || item.status === 'Afastado';
+
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => {
+      const valA = a[sortField];
+      const valB = b[sortField];
+      
+      const strA = typeof valA === 'string' ? valA.toLowerCase() : valA;
+      const strB = typeof valB === 'string' ? valB.toLowerCase() : valB;
+      
+      if (strA < strB) return sortAsc ? -1 : 1;
+      if (strA > strB) return sortAsc ? 1 : -1;
+      return 0;
+    });
 
   const handleSaveAudiencia = (e: React.FormEvent) => {
     e.preventDefault();
@@ -610,10 +415,6 @@ export default function App() {
         console.error('Erro ao excluir audiência do supabase', err);
       }
     }
-  };
-
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
   };
 
   const stats = {
@@ -827,7 +628,7 @@ export default function App() {
 
       {/* Table Area */}
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 flex-1 overflow-hidden flex flex-col min-h-0">
-        <div className="overflow-auto flex-1">
+        <div className="overflow-auto flex-1 contain-layout gpu-layer smooth-scroll">
           <table className="w-full border-collapse text-sm whitespace-nowrap">
             <thead className="bg-slate-50 sticky top-0 z-10">
               <tr>
@@ -1007,450 +808,18 @@ export default function App() {
   )}
 
   {activeAdminTab === 'ficha_individual' && (
-    <div className="flex-1 overflow-auto p-4 md:p-6 flex flex-col gap-4">
-      {/* Toolbar / Filtros (Ficha Individual) */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row gap-3 items-center shrink-0 relative z-20">
-        <div className="flex items-center gap-3 text-slate-800 font-semibold flex-1">
-          <button 
-            onClick={() => {
-              setActiveAdminTab('administrativo');
-              setSelectedFichaMemberId(null);
-              setActiveFichaSection(null);
-              setFichaSearch('');
-            }}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
-            title="Voltar"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-600" />
-            <span>Ficha Individual</span>
-          </div>
-        </div>
-        
-        <div className="flex flex-wrap gap-2 w-full md:w-auto relative">
-          <div className="relative flex-1 md:w-auto md:min-w-[300px]">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Buscar por nome, matrícula ou ID..." 
-              className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white text-slate-900"
-              value={fichaSearch}
-              onChange={(e) => {
-                setFichaSearch(e.target.value);
-                if (e.target.value === '') setSelectedFichaMemberId(null);
-              }}
-            />
-            
-            {/* Search Results Dropdown */}
-            {fichaSearch.trim() !== '' && !selectedFichaMemberId && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
-                {filteredFichaMembers.length > 0 ? (
-                  filteredFichaMembers.map(member => (
-                    <button
-                      key={member.id}
-                      className="w-full text-left px-4 py-3 hover:bg-slate-50 border-b border-slate-100 last:border-0 transition-colors flex items-center gap-3"
-                      onClick={() => {
-                        setSelectedFichaMemberId(member.id);
-                        setActiveFichaSection(null);
-                        setFichaSearch('');
-                      }}
-                    >
-                      <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden">
-                        {member.photoUrl ? (
-                          <img src={member.photoUrl} alt={member.nome} className="w-full h-full object-cover" />
-                        ) : (
-                          getInitials(member.nome)
-                        )}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-slate-900">{member.patente} {member.nome}</span>
-                        <span className="text-xs text-slate-500">Matrícula: {member.matricula} | ID: {member.id}</span>
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="px-4 py-3 text-sm text-slate-500 text-center">Nenhum policial encontrado.</div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Área de Conteúdo da Ficha Individual */}
-      {selectedFichaMemberId ? (() => {
-        const member = members.find(m => m.id === selectedFichaMemberId);
-        if (!member) return null;
-        return (
-          <div className="bg-white flex-1 rounded-lg border border-slate-200 flex flex-col p-6 shadow-sm">
-            <div className="flex justify-between items-start mb-6 pb-4 border-b border-slate-100 gap-4">
-              <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                <label className="relative w-12 h-12 md:w-16 md:h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg md:text-xl font-bold cursor-pointer group overflow-hidden shrink-0">
-                  {member.photoUrl ? (
-                    <img src={member.photoUrl} alt={member.nome} className="w-full h-full object-cover" />
-                  ) : (
-                    member.nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
-                  )}
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <FileUp className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                  </div>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
-                    onChange={(e) => handlePhotoUpload(e, member.id)}
-                  />
-                </label>
-                <div className="min-w-0">
-                  <h2 className="text-lg md:text-2xl font-bold text-slate-900 truncate">{member.patente} {member.nome}</h2>
-                  <p className="text-xs md:text-base text-slate-500 truncate">{member.guerra} | Matrícula: {member.matricula}</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => {
-                  setSelectedFichaMemberId(null);
-                  setActiveFichaSection(null);
-                }}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
-                title="Fechar ficha"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-              {activeFichaSection ? (
-                <div className="flex flex-col gap-6">
-                  <div className="flex items-center gap-3 pb-4 border-b border-slate-200">
-                    <button 
-                      onClick={() => setActiveFichaSection(null)}
-                      className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
-                      title="Voltar para seções"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <h3 className="text-lg font-bold text-slate-800">{activeFichaSection}</h3>
-                  </div>
-                  
-                  {activeFichaSection === 'Dados Principais' ? (
-                    <div className="flex flex-col gap-8 pb-8">
-                      {/* Dados Funcionais */}
-                      <section className="bg-slate-50 p-5 rounded-lg border border-slate-200">
-                        <h4 className="text-md font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                          <Briefcase className="w-4 h-4 text-blue-600" /> Dados Funcionais
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          <div>
-                            <label htmlFor="ficha-guerra" className="block text-xs font-medium text-slate-500 mb-1">Nome de Guerra</label>
-                            <input id="ficha-guerra" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.guerra || ''} onChange={(e) => setFichaFormData({...fichaFormData, guerra: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-quadro" className="block text-xs font-medium text-slate-500 mb-1">Quadro</label>
-                            <input id="ficha-quadro" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="Ex: QOPM" value={fichaFormData.quadro || ''} onChange={(e) => setFichaFormData({...fichaFormData, quadro: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-patente" className="block text-xs font-medium text-slate-500 mb-1">Posto/Grad.</label>
-                            <input id="ficha-patente" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.patente || ''} onChange={(e) => setFichaFormData({...fichaFormData, patente: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-rgmilitar" className="block text-xs font-medium text-slate-500 mb-1">RG Militar</label>
-                            <input id="ficha-rgmilitar" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="000.000" value={fichaFormData.rgMilitar || ''} onChange={(e) => setFichaFormData({...fichaFormData, rgMilitar: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-dt-rg" className="block text-xs font-medium text-slate-500 mb-1">Data de Emissão</label>
-                            <input id="ficha-dt-rg" type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataEmissaoRg || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataEmissaoRg: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-comp" className="block text-xs font-medium text-slate-500 mb-1">Comportamento</label>
-                            <select id="ficha-comp" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.comportamento || 'Bom'} onChange={(e) => setFichaFormData({...fichaFormData, comportamento: e.target.value})}>
-                              <option value="Excepcional">Excepcional</option>
-                              <option value="Ótimo">Ótimo</option>
-                              <option value="Bom">Bom</option>
-                              <option value="Insuficiente">Insuficiente</option>
-                              <option value="Mau">Mau</option>
-                            </select>
-                          </div>
-                        </div>
-                      </section>
-
-                      {/* Dados Pessoais */}
-                      <section className="bg-slate-50 p-5 rounded-lg border border-slate-200">
-                        <h4 className="text-md font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                          <User className="w-4 h-4 text-blue-600" /> Dados Pessoais
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          <div className="lg:col-span-2">
-                            <label htmlFor="ficha-nome" className="block text-xs font-medium text-slate-500 mb-1">Nome Completo</label>
-                            <input id="ficha-nome" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.nome || ''} onChange={(e) => setFichaFormData({...fichaFormData, nome: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-cpf" className="block text-xs font-medium text-slate-500 mb-1">CPF</label>
-                            <input id="ficha-cpf" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="000.000.000-00" value={fichaFormData.cpf || ''} onChange={(e) => setFichaFormData({...fichaFormData, cpf: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-matricula" className="block text-xs font-medium text-slate-500 mb-1">Matrícula</label>
-                            <input id="ficha-matricula" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.matricula || ''} onChange={(e) => setFichaFormData({...fichaFormData, matricula: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-vinculo" className="block text-xs font-medium text-slate-500 mb-1">Vínculo</label>
-                            <input id="ficha-vinculo" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" placeholder="Efetivo" value={fichaFormData.vinculo || ''} onChange={(e) => setFichaFormData({...fichaFormData, vinculo: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-dt-nasc" className="block text-xs font-medium text-slate-500 mb-1">Data de Nascimento</label>
-                            <input id="ficha-dt-nasc" type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataNascimento: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-cidade-nasc" className="block text-xs font-medium text-slate-500 mb-1">Cidade de Nascimento</label>
-                            <input id="ficha-cidade-nasc" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.cidadeNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, cidadeNascimento: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-uf" className="block text-xs font-medium text-slate-500 mb-1">UF Nascimento</label>
-                            <select id="ficha-uf" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.ufNascimento || ''} onChange={(e) => setFichaFormData({...fichaFormData, ufNascimento: e.target.value})}>
-                              <option value="">Selecione...</option>
-                              <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-pasep" className="block text-xs font-medium text-slate-500 mb-1">PASEP</label>
-                            <input id="ficha-pasep" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.pasep || ''} onChange={(e) => setFichaFormData({...fichaFormData, pasep: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-reg-civil" className="block text-xs font-medium text-slate-500 mb-1">Reg. Civil</label>
-                            <input id="ficha-reg-civil" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.regCivil || ''} onChange={(e) => setFichaFormData({...fichaFormData, regCivil: e.target.value})} />
-                          </div>
-                          <div className="lg:col-span-2">
-                            <label htmlFor="ficha-pai" className="block text-xs font-medium text-slate-500 mb-1">Pai</label>
-                            <input id="ficha-pai" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.pai || ''} onChange={(e) => setFichaFormData({...fichaFormData, pai: e.target.value})} />
-                          </div>
-                          <div className="lg:col-span-2">
-                            <label htmlFor="ficha-mae" className="block text-xs font-medium text-slate-500 mb-1">Mãe</label>
-                            <input id="ficha-mae" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.mae || ''} onChange={(e) => setFichaFormData({...fichaFormData, mae: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-sangue" className="block text-xs font-medium text-slate-500 mb-1">Tipo Sanguíneo</label>
-                            <select id="ficha-sangue" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.tipoSanguineo || ''} onChange={(e) => setFichaFormData({...fichaFormData, tipoSanguineo: e.target.value})}>
-                              <option value="">Selecione...</option>
-                              <option value="A">A</option>
-                              <option value="B">B</option>
-                              <option value="AB">AB</option>
-                              <option value="O">O</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-fator-rh" className="block text-xs font-medium text-slate-500 mb-1">Fator RH</label>
-                            <select id="ficha-fator-rh" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.fatorRh || ''} onChange={(e) => setFichaFormData({...fichaFormData, fatorRh: e.target.value})}>
-                              <option value="">Selecione...</option>
-                              <option value="+">Positivo (+)</option>
-                              <option value="-">Negativo (-)</option>
-                            </select>
-                          </div>
-                        </div>
-                      </section>
-
-                      {/* Situação Funcional */}
-                      <section className="bg-slate-50 p-5 rounded-lg border border-slate-200">
-                        <h4 className="text-md font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-blue-600" /> Situação Funcional
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          <div>
-                            <label htmlFor="ficha-dt-inc" className="block text-xs font-medium text-slate-500 mb-1">Data Inclusão</label>
-                            <input id="ficha-dt-inc" type="date" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.dataInclusao || ''} onChange={(e) => setFichaFormData({...fichaFormData, dataInclusao: e.target.value})} />
-                          </div>
-                          <div>
-                            <label htmlFor="ficha-status" className="block text-xs font-medium text-slate-500 mb-1">Situação</label>
-                            <select id="ficha-status" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.status || 'Ativo'} onChange={(e) => setFichaFormData({...fichaFormData, status: e.target.value})}>
-                              <option value="Ativo">Ativo</option>
-                              <option value="Férias">Férias</option>
-                              <option value="Licença">Licença</option>
-                              <option value="Afastado">Afastado</option>
-                            </select>
-                          </div>
-                        </div>
-                      </section>
-                      
-                      <div className="flex justify-end gap-3 mt-4">
-                        <button 
-                          onClick={() => setActiveFichaSection(null)}
-                          className="px-4 py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 transition-colors font-medium"
-                        >
-                          Cancelar
-                        </button>
-                        <button 
-                          onClick={handleSaveFicha}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                        >
-                          <CheckCircle className="w-4 h-4" /> Salvar Alterações
-                        </button>
-                      </div>
-                    </div>
-                  ) : activeFichaSection === 'Anexos' ? (
-                    <div className="flex flex-col gap-8 pb-8">
-                      <section className="bg-slate-50 p-5 rounded-lg border border-slate-200">
-                        <div className="flex justify-between items-center mb-6">
-                          <h4 className="text-md font-semibold text-slate-800 flex items-center gap-2">
-                            <Paperclip className="w-4 h-4 text-blue-600" /> Documentos Anexos
-                          </h4>
-                        </div>
-                        
-                        {(() => {
-                          const member = members.find(m => m.id === selectedFichaMemberId);
-                          const anexos = member?.anexos || [];
-                          
-                          return (
-                            <div className="flex flex-col gap-6">
-                              {/* Drag & Drop Zone */}
-                              <div 
-                                onDragOver={handleDragOverAnexo}
-                                onDragLeave={handleDragLeaveAnexo}
-                                onDrop={handleDropAnexo}
-                                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-                                  isDraggingAnexo 
-                                    ? 'border-blue-500 bg-blue-50 scale-[1.02]' 
-                                    : 'border-slate-300 bg-white hover:bg-slate-50'
-                                }`}
-                              >
-                                <UploadCloud className={`w-12 h-12 mx-auto mb-4 transition-colors ${isDraggingAnexo ? 'text-blue-600' : 'text-slate-400'}`} />
-                                <h3 className="text-lg font-semibold text-slate-800 mb-1">Arraste e solte seus arquivos aqui</h3>
-                                <p className="text-sm text-slate-500 mb-6">ou clique no botão abaixo para selecionar do seu computador</p>
-                                
-                                <label className="cursor-pointer px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium inline-flex items-center gap-2 shadow-sm">
-                                  <Search className="w-4 h-4" /> Procurar Arquivos
-                                  <input 
-                                    type="file" 
-                                    multiple 
-                                    className="hidden" 
-                                    accept=".pdf,.doc,.docx,.xls,.xlsx"
-                                    onChange={handleUploadAnexo}
-                                  />
-                                </label>
-                                <p className="text-xs text-slate-400 mt-4">Formatos suportados: PDF, Word, Excel. Tamanho máximo: 5MB por arquivo.</p>
-                              </div>
-
-                              {/* Lista de Anexos */}
-                              {anexos.length > 0 && (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                                  {anexos.map(anexo => {
-                                    const isPdf = anexo.type.includes('pdf') || anexo.name.toLowerCase().endsWith('.pdf');
-                                    const isExcel = anexo.type.includes('spreadsheet') || anexo.type.includes('excel') || anexo.name.toLowerCase().match(/\.(xls|xlsx)$/);
-                                    const isWord = anexo.type.includes('word') || anexo.name.toLowerCase().match(/\.(doc|docx)$/);
-                                    
-                                    return (
-                                      <div key={anexo.id} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow group">
-                                        <div className="flex items-center gap-3 overflow-hidden">
-                                          <div className={`p-2 rounded-md shrink-0 ${isPdf ? 'bg-red-100 text-red-600' : isExcel ? 'bg-green-100 text-green-600' : isWord ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'}`}>
-                                            {isPdf ? <FileText className="w-5 h-5" /> : isExcel ? <FileSpreadsheet className="w-5 h-5" /> : isWord ? <FileText className="w-5 h-5" /> : <File className="w-5 h-5" />}
-                                          </div>
-                                          <div className="overflow-hidden">
-                                            <p className="text-sm font-medium text-slate-800 truncate" title={anexo.name}>{anexo.name}</p>
-                                            <div className="flex items-center gap-2 text-xs text-slate-500">
-                                              <span>{new Date(anexo.date).toLocaleDateString('pt-BR')}</span>
-                                              {anexo.size && (
-                                                <>
-                                                  <span>•</span>
-                                                  <span>{formatBytes(anexo.size)}</span>
-                                                </>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                          <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Baixar">
-                                            <Download className="w-4 h-4" />
-                                          </a>
-                                          {/* eslint-disable-next-line react-hooks/refs */}
-                                          <button aria-label="Excluir item" onClick={() => handleRemoveAnexo(anexo.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" title="Remover">
-                                            <Trash2 className="w-4 h-4" aria-hidden="true" />
-                                          </button>
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })()}
-                      </section>
-                    </div>
-                  ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-slate-500 py-12">
-                      <Edit2 className="w-12 h-12 text-slate-300 mb-4" />
-                      <h3 className="text-lg font-medium text-slate-900 mb-2">Em Desenvolvimento</h3>
-                      <p className="text-center max-w-md">
-                        A seção <strong>{activeFichaSection}</strong> está em desenvolvimento e será disponibilizada em breve.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                  {[
-                    { name: 'Dados Principais', icon: User },
-                    { name: 'Dados Complementares', icon: Info },
-                    { name: 'Agregações', icon: Layers },
-                    { name: 'APED', icon: ShieldAlert },
-                    { name: 'Arma de Fogo', icon: Crosshair },
-                    { name: 'Anexos', icon: Paperclip },
-                    { name: 'Atestados', icon: Stethoscope },
-                    { name: 'Averbações', icon: History },
-                    { name: 'Cargo/Função', icon: Briefcase },
-                    { name: 'Certificados', icon: Award },
-                    { name: 'Comissões', icon: Users },
-                    { name: 'Cursos', icon: GraduationCap },
-                    { name: 'Dependentes', icon: Baby },
-                    { name: 'Diversos', icon: Archive },
-                    { name: 'Elogios/Medalha', icon: Medal },
-                    { name: 'Fardamento', icon: Shirt },
-                    { name: 'Férias', icon: Palmtree },
-                    { name: 'Inspeção de Saúde', icon: HeartPulse },
-                    { name: 'Junta Médica', icon: Hospital },
-                    { name: 'Justiça e Disciplina', icon: Scale },
-                    { name: 'Lotações', icon: MapPin },
-                    { name: 'Licenças/Dispensa', icon: CalendarOff },
-                    { name: 'Pontuação', icon: Calculator },
-                    { name: 'Progressões', icon: TrendingUp },
-                    { name: 'Promoções', icon: ChevronsUp },
-                    { name: 'TAF', icon: Dumbbell },
-                    { name: 'Tempo de Serviço', icon: ClockIcon },
-                    { name: 'TCC', icon: BookOpen },
-                    { name: 'Trabalhos Cientifícos', icon: Microscope },
-                  ].map((section, idx) => (
-                    <button 
-                      key={idx}
-                      onClick={() => setActiveFichaSection(section.name)}
-                      className="bg-slate-50 border border-slate-200 rounded-lg p-3 md:p-4 flex flex-col items-center justify-center gap-2 md:gap-3 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors text-slate-600 group"
-                    >
-                      <section.icon className="w-5 h-5 md:w-8 md:h-8 text-slate-400 group-hover:text-blue-600 transition-colors" />
-                      <span className="text-[10px] md:text-sm font-medium text-center leading-tight">{section.name}</span>
-                    </button>
-                  ))}
-                  
-                  {/* Botão Especial: Gerar Ficha Individual */}
-                  <button 
-                    onClick={() => window.print()}
-                    className="bg-blue-600 border border-blue-700 rounded-lg p-3 md:p-4 flex flex-col items-center justify-center gap-2 md:gap-3 hover:bg-blue-700 text-white transition-colors shadow-sm group"
-                  >
-                    <Printer className="w-5 h-5 md:w-8 md:h-8 text-blue-200 group-hover:text-white transition-colors" />
-                    <span className="text-[10px] md:text-sm font-medium text-center leading-tight">Gerar Ficha Individual</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })() : (
-        <div className="bg-white flex-1 min-h-[400px] rounded-lg border border-slate-200 flex flex-col items-center justify-center text-slate-500 p-8 shadow-sm">
-          <FileText className="w-16 h-16 text-slate-300 mb-4" />
-          <h3 className="text-xl font-medium text-slate-900 mb-2">Ficha Individual</h3>
-          <p className="text-center max-w-md">
-            Utilize a barra de busca acima para encontrar um policial por nome, matrícula ou ID e abrir sua ficha individual para edição.
-          </p>
-        </div>
-      )}
-    </div>
+    <Suspense fallback={<PageSkeleton />}>
+      <FichaIndividualPage 
+        members={members} 
+        onUpdateMember={(id, updates) => setMembers(members.map(m => m.id === id ? { ...m, ...updates } : m))} 
+        selectedFichaMemberId={selectedFichaMemberId} 
+        setSelectedFichaMemberId={setSelectedFichaMemberId}
+        onClose={() => {
+          setActiveAdminTab('administrativo');
+          setSelectedFichaMemberId(null);
+        }}
+      />
+    </Suspense>
   )}
 </main>
 
