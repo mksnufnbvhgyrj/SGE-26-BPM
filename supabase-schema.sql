@@ -8,9 +8,8 @@ CREATE TABLE IF NOT EXISTS app_store (
 -- Habilitar RLS (Row Level Security)
 ALTER TABLE app_store ENABLE ROW LEVEL SECURITY;
 
--- Criar política para permitir leitura e escrita pública (para fins de demonstração/desenvolvimento)
--- Em produção, você deve restringir isso apenas para usuários autenticados
-CREATE POLICY "Permitir acesso total" ON app_store
+-- Criar política para leitura e escrita apenas para usuários autenticados
+CREATE POLICY "Permitir acesso autenticado" ON app_store
   FOR ALL
-  USING (true)
-  WITH CHECK (true);
+  USING (auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'authenticated');

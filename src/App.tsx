@@ -124,15 +124,17 @@ const LoginScreen = ({ onLogin, members }: { onLogin: (auth: AuthState) => void,
     if (member) {
       onLogin({ role: 'USER', user: member });
     } else {
+      console.warn(`Tentativa de login individual falhou para CPF: ${cpf}`);
       setError('CPF ou Matrícula incorretos.');
     }
   };
 
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminUser === 'admin' && adminPass === 'admin') {
+    if (adminUser === (import.meta.env.VITE_ADMIN_USER || 'admin') && adminPass === (import.meta.env.VITE_ADMIN_PASS || 'admin')) {
       onLogin({ role: 'ADMIN' });
     } else {
+      console.warn(`Tentativa de login de administrador falhou para usuário: ${adminUser}`);
       setError('Usuário ou senha incorretos.');
     }
   };
@@ -631,26 +633,27 @@ export default function App() {
   // Sync members to Supabase when changed
   useEffect(() => {
     if (isLoadingData) return;
-    const syncMembers = async () => {
+    const handler = setTimeout(async () => {
       await supabase.from('app_store').upsert({ key: 'members', value: members });
-    };
-    syncMembers();
+    }, 1000);
+    return () => clearTimeout(handler);
   }, [members, isLoadingData]);
 
   // Sync audiencias to Supabase when changed
   useEffect(() => {
     if (isLoadingData) return;
-    const syncAudiencias = async () => {
+    const handler = setTimeout(async () => {
       await supabase.from('app_store').upsert({ key: 'audiencias', value: audiencias });
-    };
-    syncAudiencias();
+    }, 1000);
+    return () => clearTimeout(handler);
   }, [audiencias, isLoadingData]);
 
   const [search, setSearch] = useState('');
   const [filterPatente, setFilterPatente] = useState('');
   const [filterFuncao, setFilterFuncao] = useState('');
   
-  const [sortField, setSortField] = useState<keyof Member>('ordem');
+  type SortableFields = 'ordem' | 'matricula' | 'cpf' | 'patente' | 'nome' | 'guerra' | 'funcao' | 'status';
+  const [sortField, setSortField] = useState<SortableFields>('ordem');
   const [sortAsc, setSortAsc] = useState(true);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -664,11 +667,11 @@ export default function App() {
   const [fichaSearch, setFichaSearch] = useState('');
   const [selectedFichaMemberId, setSelectedFichaMemberId] = useState<number | null>(null);
   const [activeFichaSection, setActiveFichaSection] = useState<string | null>(null);
-  const [fichaFormData, setFichaFormData] = useState<any>({});
+  const [fichaFormData, setFichaFormData] = useState<Partial<Member>>({});
   const [isDraggingAnexo, setIsDraggingAnexo] = useState(false);
 
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'danger' } | null>(null);
-  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = (message: string, type: 'success' | 'danger' = 'success') => {
     setToast({ message, type });
@@ -712,7 +715,7 @@ export default function App() {
   const handleSaveFicha = () => {
     if (selectedFichaMemberId) {
       const newNotification: Notification = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         message: 'Sua ficha individual (Dados Principais) foi atualizada pelo administrador.',
         date: new Date().toISOString(),
         read: false
@@ -750,7 +753,7 @@ export default function App() {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         newAnexos.push({
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          id: crypto.randomUUID(),
           name: file.name,
           url: base64String,
           type: file.type || 'application/octet-stream',
@@ -761,7 +764,7 @@ export default function App() {
         processedFiles++;
         if (processedFiles === validFiles.length) {
           const newNotification: Notification = {
-            id: Date.now().toString(),
+            id: crypto.randomUUID(),
             message: 'Novos anexos foram adicionados à sua ficha.',
             date: new Date().toISOString(),
             read: false
@@ -827,7 +830,7 @@ export default function App() {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         const newNotification: Notification = {
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           message: 'Sua foto de perfil foi atualizada.',
           date: new Date().toISOString(),
           read: false
@@ -881,7 +884,7 @@ export default function App() {
       });
   }, [members, search, filterPatente, filterFuncao, sortField, sortAsc]);
 
-  const handleSort = (field: keyof Member) => {
+  const handleSort = (field: SortableFields) => {
     if (sortField === field) {
       setSortAsc(!sortAsc);
     } else {
@@ -930,9 +933,13 @@ export default function App() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.cpf || !formData.matricula || !formData.nome) {
+      showToast('Por favor, preencha CPF, Matrícula e Nome.', 'danger');
+      return;
+    }
     if (editingId) {
       const newNotification: Notification = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         message: 'Suas informações funcionais foram atualizadas pelo administrador.',
         date: new Date().toISOString(),
         read: false
@@ -942,7 +949,7 @@ export default function App() {
     } else {
       const newMember = {
         ...formData,
-        id: Date.now(),
+        id: Date.now() + Math.floor(Math.random() * 1000),
         ordem: members.length + 1,
       } as Member;
       setMembers([...members, newMember]);
@@ -987,7 +994,7 @@ export default function App() {
     } else {
       const newAudiencia = {
         ...audienciaFormData,
-        id: Date.now(),
+        id: Date.now() + Math.floor(Math.random() * 1000),
       } as Audiencia;
       setAudiencias([...audiencias, newAudiencia]);
       showToast('Nova audiência adicionada!', 'success');
@@ -1015,17 +1022,25 @@ export default function App() {
 
   const handleAudienciaFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (file && file.size > 5 * 1024 * 1024) {
+      showToast('O arquivo excede o limite de 5MB.', 'danger');
+      e.target.value = '';
+      return;
+    }
     if (file && file.type === 'application/pdf') {
-      const url = URL.createObjectURL(file);
-      const newPdf = {
-        id: Math.random().toString(36).substring(7),
-        name: file.name,
-        url: url
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newPdf = {
+          id: crypto.randomUUID(),
+          name: file.name,
+          url: reader.result as string
+        };
+        setAudienciaFormData({
+          ...audienciaFormData,
+          pdfs: [...(audienciaFormData.pdfs || []), newPdf]
+        });
       };
-      setAudienciaFormData({
-        ...audienciaFormData,
-        pdfs: [...(audienciaFormData.pdfs || []), newPdf]
-      });
+      reader.readAsDataURL(file);
     } else if (file) {
       showToast('Por favor, selecione apenas arquivos PDF.', 'danger');
     }
@@ -1267,7 +1282,7 @@ export default function App() {
                 ].map((col) => (
                   <th 
                     key={col.key}
-                    onClick={() => handleSort(col.key as keyof Member)}
+                    onClick={() => handleSort(col.key as SortableFields)}
                     className="px-4 py-3 text-left font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 cursor-pointer hover:bg-slate-100 hover:text-blue-600 select-none transition-colors"
                   >
                     <div className="flex items-center gap-1">
@@ -2189,9 +2204,17 @@ export default function App() {
                       className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                       onChange={e => {
                         const file = e.target.files?.[0];
+                        if (file && file.size > 5 * 1024 * 1024) {
+                          alert('O arquivo excede o limite de 5MB.');
+                          e.target.value = '';
+                          return;
+                        }
                         if (file && file.type === 'application/pdf') {
-                          const url = URL.createObjectURL(file);
-                          setFormData({...formData, pdfName: file.name, pdfUrl: url});
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setFormData({...formData, pdfName: file.name, pdfUrl: reader.result as string});
+                          };
+                          reader.readAsDataURL(file);
                         } else if (file) {
                           alert('Por favor, selecione um arquivo PDF válido.');
                           e.target.value = '';
