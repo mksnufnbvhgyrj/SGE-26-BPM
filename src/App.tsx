@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, BarChart3, FileUp, Settings, LogOut, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, Bell } from 'lucide-react';
+import { supabase } from './lib/supabase';
+import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, BarChart3, FileUp, Settings, LogOut, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, Bell, FileSpreadsheet, File, Upload, UploadCloud, Phone, Mail } from 'lucide-react';
 
 type Status = 'Ativo' | 'Férias' | 'Licença' | 'Afastado';
 
@@ -8,6 +9,15 @@ export interface Notification {
   message: string;
   date: string;
   read: boolean;
+}
+
+export interface Anexo {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  date: string;
+  size?: number;
 }
 
 interface Member {
@@ -41,6 +51,7 @@ interface Member {
   fatorRh?: string;
   dataInclusao?: string;
   notifications?: Notification[];
+  anexos?: Anexo[];
 }
 
 interface AudienciaPdf {
@@ -78,17 +89,16 @@ const INITIAL_DATA: Member[] = [
 const PATENTES = ["Sd PM", "Cb PM", "3º Sgt PM", "2º Sgt PM", "1º Sgt PM", "Subten PM", "Asp Of PM", "2º Ten PM", "1º Ten PM", "Cap PM", "Maj PM", "Ten Cel PM"];
 
 const Clock = () => {
-  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
   
   useEffect(() => {
-    setCurrentTime(new Date());
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
   return (
     <div className="font-semibold text-slate-500 hidden sm:block">
-      {currentTime ? `${currentTime.toLocaleDateString('pt-BR')} ${currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` : ''}
+      {currentTime.toLocaleDateString('pt-BR')} {currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
     </div>
   );
 };
@@ -232,40 +242,55 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
     }
   };
 
+  const userAudiencias = audiencias.filter(a => a.policialIds?.includes(user.id));
+  const upcomingAudiencias = userAudiencias
+    .filter(a => new Date(a.data + 'T' + a.hora) >= new Date())
+    .sort((a, b) => new Date(a.data + 'T' + a.hora).getTime() - new Date(b.data + 'T' + b.hora).getTime());
+  const nextAudiencia = upcomingAudiencias.length > 0 ? upcomingAudiencias[0] : null;
+
   return (
-    <div className="min-h-screen bg-slate-100 p-4 md:p-6 flex flex-col items-center">
-      <header className="w-full max-w-6xl flex justify-between items-center mb-8">
-        <div className="flex items-center gap-3 text-2xl font-bold text-slate-900">
-          <span className="bg-blue-600 text-white px-2 py-1 rounded-md text-base">26º BPM</span>
-          Portal do Policial
+    <div className="min-h-screen bg-slate-100 p-4 md:p-6 flex flex-col items-center font-sans">
+      <header className="w-full max-w-6xl flex justify-between items-center mb-8 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+        <div className="flex items-center gap-3 text-xl font-bold text-slate-900">
+          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-inner">
+            <ShieldAlert className="w-6 h-6" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-slate-500 font-medium leading-tight">26º BPM</span>
+            <span className="leading-tight">Portal do Policial</span>
+          </div>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           <div className="relative">
             <button 
               onClick={handleNotificationsClick}
-              className="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-200 rounded-full transition-colors"
+              className="relative p-2.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
             >
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-100"></span>
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
               )}
             </button>
             
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden z-50">
-                <div className="p-3 border-b border-slate-100 bg-slate-50">
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
+                <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                   <h4 className="font-semibold text-slate-800">Notificações</h4>
+                  {unreadCount > 0 && <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{unreadCount} novas</span>}
                 </div>
                 <div className="max-h-80 overflow-y-auto">
                   {user.notifications && user.notifications.length > 0 ? (
                     user.notifications.map(notif => (
-                      <div key={notif.id} className={`p-4 border-b border-slate-50 last:border-0 ${notif.read ? 'bg-white' : 'bg-blue-50/50'}`}>
-                        <p className="text-sm text-slate-800 mb-1">{notif.message}</p>
-                        <p className="text-xs text-slate-500">{new Date(notif.date).toLocaleString('pt-BR')}</p>
+                      <div key={notif.id} className={`p-4 border-b border-slate-50 last:border-0 ${notif.read ? 'bg-white' : 'bg-blue-50/30'}`}>
+                        <p className="text-sm text-slate-800 mb-1.5">{notif.message}</p>
+                        <p className="text-xs text-slate-400 flex items-center gap-1">
+                          <ClockIcon className="w-3 h-3" /> {new Date(notif.date).toLocaleString('pt-BR')}
+                        </p>
                       </div>
                     ))
                   ) : (
-                    <div className="p-6 text-center text-slate-500 text-sm">
+                    <div className="p-8 text-center text-slate-500 text-sm flex flex-col items-center">
+                      <Bell className="w-8 h-8 text-slate-300 mb-2" />
                       Nenhuma notificação no momento.
                     </div>
                   )}
@@ -273,141 +298,289 @@ const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsAsRead }
               </div>
             )}
           </div>
-          <button onClick={onLogout} className="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">
-            Sair
+          <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 rounded-lg transition-colors">
+            <LogOut className="w-4 h-4" /> Sair
           </button>
         </div>
       </header>
       
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Left Column: Minhas Audiências */}
-        <div className="lg:col-span-2 order-2 lg:order-1">
-          <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Scale className="w-6 h-6 text-blue-600" /> Minhas Audiências
-          </h3>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            {audiencias.filter(a => a.policialIds?.includes(user.id)).length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Data/Hora</th>
-                      <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Local</th>
-                      <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Processo</th>
-                      <th className="px-4 py-3 font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Status</th>
-                      <th className="px-4 py-3 text-center font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Doc</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {audiencias.filter(a => a.policialIds?.includes(user.id)).map(item => (
-                      <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 border-b border-slate-100 font-medium text-slate-900">
-                          {new Date(item.data).toLocaleDateString('pt-BR')} às {item.hora}
-                        </td>
-                        <td className="px-4 py-3 border-b border-slate-100 text-slate-700">{item.local}</td>
-                        <td className="px-4 py-3 border-b border-slate-100 text-slate-700 font-mono">{item.processo}</td>
-                        <td className="px-4 py-3 border-b border-slate-100">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${
-                            item.status === 'Agendada' ? 'bg-blue-100 text-blue-700' :
-                            item.status === 'Realizada' ? 'bg-emerald-100 text-emerald-700' :
-                            'bg-red-100 text-red-700'
-                          }`}>
-                            {item.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 border-b border-slate-100 text-center">
-                          {item.pdfs && item.pdfs.length > 0 ? (
-                            <div className="flex items-center justify-center gap-1 flex-wrap">
-                              {item.pdfs.map((pdf, idx) => (
-                                <a key={pdf.id} href={pdf.url} target="_blank" rel="noreferrer" className="inline-flex items-center p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title={pdf.name}>
-                                  <FileText className="w-4 h-4" />
-                                  {item.pdfs!.length > 1 && <span className="text-[10px] ml-0.5 font-bold">{idx + 1}</span>}
-                                </a>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-slate-300">-</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+      <div className="w-full max-w-6xl flex flex-col gap-6">
+        {/* Welcome & Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 text-white shadow-md flex flex-col justify-between">
+            <div>
+              <p className="text-blue-200 text-sm font-medium mb-1">Bem-vindo de volta,</p>
+              <h2 className="text-2xl font-bold">{user.patente} {user.guerra}</h2>
+            </div>
+            <div className="mt-4 flex items-center gap-2">
+              <span className="flex h-3 w-3 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              </span>
+              <span className="text-sm font-medium text-blue-100">Sistema Online</span>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+              <Scale className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm text-slate-500 font-medium mb-0.5">Próxima Audiência</p>
+              {nextAudiencia ? (
+                <div>
+                  <p className="text-slate-900 font-bold">{new Date(nextAudiencia.data).toLocaleDateString('pt-BR')} às {nextAudiencia.hora}</p>
+                  <p className="text-xs text-slate-500 truncate max-w-[180px]">{nextAudiencia.local}</p>
+                </div>
+              ) : (
+                <p className="text-slate-900 font-bold">Nenhuma agendada</p>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+              <Paperclip className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm text-slate-500 font-medium mb-0.5">Documentos Anexos</p>
+              <p className="text-2xl text-slate-900 font-bold">{user.anexos?.length || 0}</p>
+              <p className="text-xs text-slate-500">Na sua ficha individual</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Left Column: Minhas Audiências & Anexos */}
+          <div className="lg:col-span-2 flex flex-col gap-6 order-2 lg:order-1">
+            {/* Audiências */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Scale className="w-5 h-5 text-blue-600" /> Minhas Audiências
+                </h3>
+                <span className="bg-slate-200 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full">{userAudiencias.length}</span>
               </div>
-            ) : (
-              <div className="p-8 text-center text-slate-500 flex flex-col items-center">
-                <Scale className="w-12 h-12 text-slate-300 mb-3" />
-                <p>Nenhuma audiência agendada para você no momento.</p>
+              
+              {userAudiencias.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-slate-50 text-slate-500">
+                      <tr>
+                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Data/Hora</th>
+                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Local</th>
+                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Processo</th>
+                        <th className="px-5 py-3 font-semibold uppercase tracking-wider border-b border-slate-200">Status</th>
+                        <th className="px-5 py-3 text-center font-semibold uppercase tracking-wider border-b border-slate-200">Doc</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {userAudiencias.map(item => (
+                        <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="px-5 py-4 font-medium text-slate-900 whitespace-nowrap">
+                            {new Date(item.data).toLocaleDateString('pt-BR')} <span className="text-slate-400 font-normal">às</span> {item.hora}
+                          </td>
+                          <td className="px-5 py-4 text-slate-700">{item.local}</td>
+                          <td className="px-5 py-4 text-slate-700 font-mono text-xs">{item.processo}</td>
+                          <td className="px-5 py-4">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${
+                              item.status === 'Agendada' ? 'bg-blue-100 text-blue-700' :
+                              item.status === 'Realizada' ? 'bg-emerald-100 text-emerald-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {item.status}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-center">
+                            {item.pdfs && item.pdfs.length > 0 ? (
+                              <div className="flex items-center justify-center gap-1 flex-wrap">
+                                {item.pdfs.map((pdf, idx) => (
+                                  <a key={pdf.id} href={pdf.url} target="_blank" rel="noreferrer" className="inline-flex items-center p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title={pdf.name}>
+                                    <FileText className="w-4 h-4" />
+                                    {item.pdfs!.length > 1 && <span className="text-[10px] ml-0.5 font-bold">{idx + 1}</span>}
+                                  </a>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-slate-300">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-10 text-center text-slate-500 flex flex-col items-center">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                    <Scale className="w-8 h-8 text-slate-300" />
+                  </div>
+                  <p className="font-medium text-slate-600">Nenhuma audiência agendada</p>
+                  <p className="text-sm mt-1">Você não possui audiências vinculadas ao seu perfil no momento.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Meus Anexos Section */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Paperclip className="w-5 h-5 text-blue-600" /> Meus Anexos
+                </h3>
+                <span className="bg-slate-200 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full">{user.anexos?.length || 0}</span>
+              </div>
+              
+              <div className="p-5">
+                {user.anexos && user.anexos.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {user.anexos.map(anexo => {
+                      const isPdf = anexo.type.includes('pdf') || anexo.name.toLowerCase().endsWith('.pdf');
+                      const isExcel = anexo.type.includes('spreadsheet') || anexo.type.includes('excel') || anexo.name.toLowerCase().match(/\.(xls|xlsx)$/);
+                      const isWord = anexo.type.includes('word') || anexo.name.toLowerCase().match(/\.(doc|docx)$/);
+                      
+                      return (
+                        <div key={anexo.id} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md hover:border-blue-200 transition-all group">
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <div className={`p-2.5 rounded-lg shrink-0 ${isPdf ? 'bg-red-50 text-red-600' : isExcel ? 'bg-green-50 text-green-600' : isWord ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-600'}`}>
+                              {isPdf ? <FileText className="w-5 h-5" /> : isExcel ? <FileSpreadsheet className="w-5 h-5" /> : isWord ? <FileText className="w-5 h-5" /> : <File className="w-5 h-5" />}
+                            </div>
+                            <div className="overflow-hidden">
+                              <p className="text-sm font-semibold text-slate-800 truncate" title={anexo.name}>{anexo.name}</p>
+                              <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                                <span>{new Date(anexo.date).toLocaleDateString('pt-BR')}</span>
+                                {anexo.size && (
+                                  <>
+                                    <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                                    <span>{formatBytes(anexo.size)}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pl-2">
+                            <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Baixar">
+                              <Download className="w-4 h-4" />
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-10 text-center text-slate-500 flex flex-col items-center">
+                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                      <FileUp className="w-8 h-8 text-slate-300" />
+                    </div>
+                    <p className="font-medium text-slate-600">Nenhum anexo encontrado</p>
+                    <p className="text-sm mt-1">Os documentos adicionados à sua ficha aparecerão aqui.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Profile Info (ID Card Style) */}
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden order-1 lg:order-2 sticky top-6">
+            <div className="h-24 bg-slate-800 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+            </div>
+            <div className="px-6 pb-6 relative">
+              <div className="w-24 h-24 rounded-2xl border-4 border-white bg-slate-100 absolute -top-12 shadow-md overflow-hidden flex items-center justify-center text-3xl font-bold text-slate-400">
+                {user.photoUrl ? (
+                  <img src={user.photoUrl} alt={user.nome} className="w-full h-full object-cover" />
+                ) : (
+                  user.nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+                )}
+              </div>
+              
+              <div className="mt-14 mb-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900 leading-tight">{user.patente} {user.guerra}</h2>
+                    <p className="text-blue-600 font-medium text-sm mt-0.5">{user.nome}</p>
+                  </div>
+                  <span className={`inline-flex px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide ${getStatusClasses(user.status)}`}>
+                    {user.status}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Matrícula</p>
+                    <p className="text-slate-900 font-semibold font-mono">{user.matricula}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">CPF</p>
+                    <p className="text-slate-900 font-semibold font-mono">{user.cpf}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 px-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                      <Briefcase className="w-4 h-4 text-slate-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium">Função</p>
+                      <p className="text-sm font-semibold text-slate-900">{user.funcao}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                      <Phone className="w-4 h-4 text-slate-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium">Telefone</p>
+                      <p className="text-sm font-semibold text-slate-900">{user.telefone || 'Não informado'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                      <Mail className="w-4 h-4 text-slate-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium">Email</p>
+                      <p className="text-sm font-semibold text-slate-900 truncate max-w-[200px]">{user.email || 'Não informado'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {user.pdfUrl && (
+              <div className="p-4 border-t border-slate-100 bg-slate-50">
+                <a href={user.pdfUrl} target="_blank" rel="noreferrer" className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all group">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-50 text-red-600 rounded-lg group-hover:bg-red-100 transition-colors">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">Documento Principal</p>
+                      <p className="text-xs text-slate-500 truncate max-w-[120px]">{user.pdfName}</p>
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                    <Download className="w-4 h-4" />
+                  </div>
+                </a>
               </div>
             )}
           </div>
         </div>
-
-        {/* Right Column: Profile Info */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden order-1 lg:order-2">
-          <div className="bg-slate-50 p-6 border-b border-slate-200 flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold overflow-hidden shrink-0">
-              {user.photoUrl ? (
-                <img src={user.photoUrl} alt={user.nome} className="w-full h-full object-cover" />
-              ) : (
-                user.nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
-              )}
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">{user.patente} {user.nome}</h2>
-              <p className="text-slate-500">{user.guerra}</p>
-            </div>
-          </div>
-          <div className="p-6 flex flex-col gap-4">
-            <div>
-              <p className="text-sm text-slate-500 font-medium mb-1">Matrícula</p>
-              <p className="text-slate-900 font-semibold">{user.matricula}</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500 font-medium mb-1">CPF</p>
-              <p className="text-slate-900 font-semibold">{user.cpf}</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500 font-medium mb-1">Função</p>
-              <p className="text-slate-900 font-semibold">{user.funcao}</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500 font-medium mb-1">Status</p>
-              <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${getStatusClasses(user.status)}`}>
-                {user.status}
-              </span>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500 font-medium mb-1">Telefone</p>
-              <p className="text-slate-900 font-semibold">{user.telefone || '-'}</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500 font-medium mb-1">Email</p>
-              <p className="text-slate-900 font-semibold">{user.email || '-'}</p>
-            </div>
-          </div>
-          {user.pdfUrl && (
-            <div className="p-6 border-t border-slate-200 bg-slate-50">
-              <div className="flex items-center justify-between bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-red-100 text-red-600 rounded-md">
-                    <FileText className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">Documento Anexo</p>
-                    <p className="text-xs text-slate-500">{user.pdfName}</p>
-                  </div>
-                </div>
-                <a href={user.pdfUrl} target="_blank" rel="noreferrer" className="px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-md hover:bg-slate-900 transition-colors">
-                  Abrir PDF
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
+};
+
+const formatBytes = (bytes: number, decimals = 2) => {
+  if (!+bytes) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 };
 
 export default function App() {
@@ -417,6 +590,62 @@ export default function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [members, setMembers] = useState<Member[]>(INITIAL_DATA);
   const [audiencias, setAudiencias] = useState<Audiencia[]>(INITIAL_AUDIENCIAS);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const { data, error } = await supabase.from('app_store').select('*');
+        if (error) {
+          console.error('Error loading from Supabase:', error);
+          return;
+        }
+        
+        if (data && data.length > 0) {
+          const membersData = data.find(d => d.key === 'members');
+          const audienciasData = data.find(d => d.key === 'audiencias');
+          
+          if (membersData && membersData.value) {
+            setMembers(membersData.value);
+          }
+          if (audienciasData && audienciasData.value) {
+            setAudiencias(audienciasData.value);
+          }
+        } else {
+          // Initialize Supabase with default data if empty
+          await supabase.from('app_store').upsert([
+            { key: 'members', value: INITIAL_DATA },
+            { key: 'audiencias', value: INITIAL_AUDIENCIAS }
+          ]);
+        }
+      } catch (err) {
+        console.error('Failed to load data:', err);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+    
+    loadData();
+  }, []);
+
+  // Sync members to Supabase when changed
+  useEffect(() => {
+    if (isLoadingData) return;
+    const syncMembers = async () => {
+      await supabase.from('app_store').upsert({ key: 'members', value: members });
+    };
+    syncMembers();
+  }, [members, isLoadingData]);
+
+  // Sync audiencias to Supabase when changed
+  useEffect(() => {
+    if (isLoadingData) return;
+    const syncAudiencias = async () => {
+      await supabase.from('app_store').upsert({ key: 'audiencias', value: audiencias });
+    };
+    syncAudiencias();
+  }, [audiencias, isLoadingData]);
+
   const [search, setSearch] = useState('');
   const [filterPatente, setFilterPatente] = useState('');
   const [filterFuncao, setFilterFuncao] = useState('');
@@ -436,6 +665,7 @@ export default function App() {
   const [selectedFichaMemberId, setSelectedFichaMemberId] = useState<number | null>(null);
   const [activeFichaSection, setActiveFichaSection] = useState<string | null>(null);
   const [fichaFormData, setFichaFormData] = useState<any>({});
+  const [isDraggingAnexo, setIsDraggingAnexo] = useState(false);
 
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'danger' } | null>(null);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -493,6 +723,100 @@ export default function App() {
           : m
       ));
       showToast('Dados Principais atualizados com sucesso!', 'success');
+    }
+  };
+
+  const processAnexoFiles = (files: FileList | File[]) => {
+    if (!selectedFichaMemberId) return;
+    const member = members.find(m => m.id === selectedFichaMemberId);
+    if (!member) return;
+
+    const validFiles = Array.from(files).filter(file => {
+      // Limit to 5MB per file to avoid localStorage/Base64 issues
+      if (file.size > 5 * 1024 * 1024) {
+        showToast(`O arquivo ${file.name} excede o limite de 5MB.`, 'danger');
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) return;
+
+    const newAnexos: Anexo[] = [];
+    let processedFiles = 0;
+
+    validFiles.forEach((file: File) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        newAnexos.push({
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          name: file.name,
+          url: base64String,
+          type: file.type || 'application/octet-stream',
+          date: new Date().toISOString(),
+          size: file.size
+        });
+
+        processedFiles++;
+        if (processedFiles === validFiles.length) {
+          const newNotification: Notification = {
+            id: Date.now().toString(),
+            message: 'Novos anexos foram adicionados à sua ficha.',
+            date: new Date().toISOString(),
+            read: false
+          };
+          
+          setMembers(members.map(m => 
+            m.id === selectedFichaMemberId 
+              ? { 
+                  ...m, 
+                  anexos: [...(m.anexos || []), ...newAnexos],
+                  notifications: [newNotification, ...(m.notifications || [])]
+                } 
+              : m
+          ));
+          showToast('Anexos importados com sucesso!', 'success');
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleUploadAnexo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processAnexoFiles(e.target.files);
+    }
+    e.target.value = ''; // Reset input
+  };
+
+  const handleDragOverAnexo = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingAnexo(true);
+  };
+
+  const handleDragLeaveAnexo = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingAnexo(false);
+  };
+
+  const handleDropAnexo = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingAnexo(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processAnexoFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleRemoveAnexo = (anexoId: string) => {
+    if (!selectedFichaMemberId) return;
+    if (window.confirm('Tem certeza que deseja remover este anexo?')) {
+      setMembers(members.map(m => 
+        m.id === selectedFichaMemberId 
+          ? { ...m, anexos: (m.anexos || []).filter(a => a.id !== anexoId) } 
+          : m
+      ));
+      showToast('Anexo removido.', 'danger');
     }
   };
 
@@ -744,6 +1068,16 @@ export default function App() {
     away: members.filter(d => ['Licença', 'Afastado'].includes(d.status)).length
   };
 
+  if (isLoadingData) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
+        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+        <h2 className="text-xl font-semibold text-slate-700">Carregando dados...</h2>
+        <p className="text-slate-500 mt-2">Conectando ao banco de dados</p>
+      </div>
+    );
+  }
+
   if (authState.role === null) {
     return <LoginScreen onLogin={setAuthState} members={members} />;
   }
@@ -953,7 +1287,14 @@ export default function App() {
             <tbody>
               {filteredAndSortedMembers.length > 0 ? (
                 filteredAndSortedMembers.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50 transition-colors group">
+                  <tr 
+                    key={item.id} 
+                    className="hover:bg-slate-50 transition-colors group cursor-pointer"
+                    onClick={() => {
+                      setSelectedFichaMemberId(item.id);
+                      setActiveAdminTab('ficha_individual');
+                    }}
+                  >
                     <td className="px-4 py-3 border-b border-slate-100 text-slate-500 font-mono">#{item.ordem}</td>
                     <td className="px-4 py-3 border-b border-slate-100 font-medium text-slate-900">{item.matricula}</td>
                     <td className="px-4 py-3 border-b border-slate-100 text-slate-700">{item.patente}</td>
@@ -980,7 +1321,7 @@ export default function App() {
                     </td>
                     <td className="px-4 py-3 border-b border-slate-100 text-center">
                       {item.pdfUrl ? (
-                        <a href={item.pdfUrl} target="_blank" rel="noreferrer" className="inline-flex p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title={item.pdfName}>
+                        <a href={item.pdfUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title={item.pdfName}>
                           <FileText className="w-4 h-4" />
                         </a>
                       ) : (
@@ -988,10 +1329,10 @@ export default function App() {
                       )}
                     </td>
                     <td className="px-4 py-3 border-b border-slate-100 text-right">
-                      <button onClick={() => openModal(item)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1">
+                      <button onClick={(e) => { e.stopPropagation(); openModal(item); }} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1">
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDelete(item.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
@@ -1431,6 +1772,94 @@ export default function App() {
                           <CheckCircle className="w-4 h-4" /> Salvar Alterações
                         </button>
                       </div>
+                    </div>
+                  ) : activeFichaSection === 'Anexos' ? (
+                    <div className="flex flex-col gap-8 pb-8">
+                      <section className="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                        <div className="flex justify-between items-center mb-6">
+                          <h4 className="text-md font-semibold text-slate-800 flex items-center gap-2">
+                            <Paperclip className="w-4 h-4 text-blue-600" /> Documentos Anexos
+                          </h4>
+                        </div>
+                        
+                        {(() => {
+                          const member = members.find(m => m.id === selectedFichaMemberId);
+                          const anexos = member?.anexos || [];
+                          
+                          return (
+                            <div className="flex flex-col gap-6">
+                              {/* Drag & Drop Zone */}
+                              <div 
+                                onDragOver={handleDragOverAnexo}
+                                onDragLeave={handleDragLeaveAnexo}
+                                onDrop={handleDropAnexo}
+                                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                                  isDraggingAnexo 
+                                    ? 'border-blue-500 bg-blue-50 scale-[1.02]' 
+                                    : 'border-slate-300 bg-white hover:bg-slate-50'
+                                }`}
+                              >
+                                <UploadCloud className={`w-12 h-12 mx-auto mb-4 transition-colors ${isDraggingAnexo ? 'text-blue-600' : 'text-slate-400'}`} />
+                                <h3 className="text-lg font-semibold text-slate-800 mb-1">Arraste e solte seus arquivos aqui</h3>
+                                <p className="text-sm text-slate-500 mb-6">ou clique no botão abaixo para selecionar do seu computador</p>
+                                
+                                <label className="cursor-pointer px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium inline-flex items-center gap-2 shadow-sm">
+                                  <Search className="w-4 h-4" /> Procurar Arquivos
+                                  <input 
+                                    type="file" 
+                                    multiple 
+                                    className="hidden" 
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx"
+                                    onChange={handleUploadAnexo}
+                                  />
+                                </label>
+                                <p className="text-xs text-slate-400 mt-4">Formatos suportados: PDF, Word, Excel. Tamanho máximo: 5MB por arquivo.</p>
+                              </div>
+
+                              {/* Lista de Anexos */}
+                              {anexos.length > 0 && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                                  {anexos.map(anexo => {
+                                    const isPdf = anexo.type.includes('pdf') || anexo.name.toLowerCase().endsWith('.pdf');
+                                    const isExcel = anexo.type.includes('spreadsheet') || anexo.type.includes('excel') || anexo.name.toLowerCase().match(/\.(xls|xlsx)$/);
+                                    const isWord = anexo.type.includes('word') || anexo.name.toLowerCase().match(/\.(doc|docx)$/);
+                                    
+                                    return (
+                                      <div key={anexo.id} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow group">
+                                        <div className="flex items-center gap-3 overflow-hidden">
+                                          <div className={`p-2 rounded-md shrink-0 ${isPdf ? 'bg-red-100 text-red-600' : isExcel ? 'bg-green-100 text-green-600' : isWord ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'}`}>
+                                            {isPdf ? <FileText className="w-5 h-5" /> : isExcel ? <FileSpreadsheet className="w-5 h-5" /> : isWord ? <FileText className="w-5 h-5" /> : <File className="w-5 h-5" />}
+                                          </div>
+                                          <div className="overflow-hidden">
+                                            <p className="text-sm font-medium text-slate-800 truncate" title={anexo.name}>{anexo.name}</p>
+                                            <div className="flex items-center gap-2 text-xs text-slate-500">
+                                              <span>{new Date(anexo.date).toLocaleDateString('pt-BR')}</span>
+                                              {anexo.size && (
+                                                <>
+                                                  <span>•</span>
+                                                  <span>{formatBytes(anexo.size)}</span>
+                                                </>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Baixar">
+                                            <Download className="w-4 h-4" />
+                                          </a>
+                                          <button onClick={() => handleRemoveAnexo(anexo.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Remover">
+                                            <Trash2 className="w-4 h-4" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </section>
                     </div>
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-slate-500 py-12">
