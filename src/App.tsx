@@ -78,16 +78,17 @@ const INITIAL_DATA: Member[] = [
 const PATENTES = ["Sd PM", "Cb PM", "3º Sgt PM", "2º Sgt PM", "1º Sgt PM", "Subten PM", "Asp Of PM", "2º Ten PM", "1º Ten PM", "Cap PM", "Maj PM", "Ten Cel PM"];
 
 const Clock = () => {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
   
   useEffect(() => {
+    setCurrentTime(new Date());
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
   return (
     <div className="font-semibold text-slate-500 hidden sm:block">
-      {currentTime.toLocaleDateString('pt-BR')} {currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+      {currentTime ? `${currentTime.toLocaleDateString('pt-BR')} ${currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` : ''}
     </div>
   );
 };
