@@ -72,6 +72,13 @@ interface Audiencia {
   pdfs?: AudienciaPdf[];
 }
 
+const generateId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+};
+
 const INITIAL_AUDIENCIAS: Audiencia[] = [
   { id: 1, data: '2026-04-10', hora: '14:30', local: '1ª Vara Criminal', processo: '0001234-56.2026.8.19.0001', policialIds: [1], status: 'Agendada' },
   { id: 2, data: '2026-04-12', hora: '09:00', local: 'Auditoria Militar', processo: '0009876-54.2026.8.19.0001', policialIds: [2], status: 'Realizada' },
@@ -594,12 +601,24 @@ export default function App() {
   const [audiencias, setAudiencias] = useState<Audiencia[]>(INITIAL_AUDIENCIAS);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'danger' } | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'danger' = 'success') => {
+    setToast({ message, type });
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
+  };
+
   useEffect(() => {
     const loadData = async () => {
       try {
         const { data, error } = await supabase.from('app_store').select('*');
         if (error) {
           console.error('Error loading from Supabase:', error);
+          showToast(`Erro ao carregar dados do banco: ${error.message || 'Desconhecido'}`, 'danger');
           return;
         }
         
@@ -615,13 +634,18 @@ export default function App() {
           }
         } else {
           // Initialize Supabase with default data if empty
-          await supabase.from('app_store').upsert([
+          const { error: initError } = await supabase.from('app_store').upsert([
             { key: 'members', value: INITIAL_DATA },
             { key: 'audiencias', value: INITIAL_AUDIENCIAS }
           ]);
+          if (initError) {
+             console.error('Error initializing Supabase:', initError);
+             showToast(`Erro ao inicializar banco: ${initError.message || 'Desconhecido'}`, 'danger');
+          }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to load data:', err);
+        showToast(`Falha de conexão com o servidor: ${err.message || 'Erro desconhecido'}`, 'danger');
       } finally {
         setIsLoadingData(false);
       }
@@ -634,7 +658,11 @@ export default function App() {
   useEffect(() => {
     if (isLoadingData) return;
     const handler = setTimeout(async () => {
-      await supabase.from('app_store').upsert({ key: 'members', value: members });
+      const { error } = await supabase.from('app_store').upsert({ key: 'members', value: members });
+      if (error) {
+        console.error('Error syncing members:', error);
+        showToast(`Erro ao salvar efetivo: ${error.message || 'Desconhecido'}`, 'danger');
+      }
     }, 1000);
     return () => clearTimeout(handler);
   }, [members, isLoadingData]);
@@ -643,7 +671,11 @@ export default function App() {
   useEffect(() => {
     if (isLoadingData) return;
     const handler = setTimeout(async () => {
-      await supabase.from('app_store').upsert({ key: 'audiencias', value: audiencias });
+      const { error } = await supabase.from('app_store').upsert({ key: 'audiencias', value: audiencias });
+      if (error) {
+        console.error('Error syncing audiencias:', error);
+        showToast(`Erro ao salvar audiências: ${error.message || 'Desconhecido'}`, 'danger');
+      }
     }, 1000);
     return () => clearTimeout(handler);
   }, [audiencias, isLoadingData]);
@@ -669,17 +701,6 @@ export default function App() {
   const [activeFichaSection, setActiveFichaSection] = useState<string | null>(null);
   const [fichaFormData, setFichaFormData] = useState<Partial<Member>>({});
   const [isDraggingAnexo, setIsDraggingAnexo] = useState(false);
-
-  const [toast, setToast] = useState<{ message: string, type: 'success' | 'danger' } | null>(null);
-  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const showToast = (message: string, type: 'success' | 'danger' = 'success') => {
-    setToast({ message, type });
-    if (toastTimeoutRef.current) {
-      clearTimeout(toastTimeoutRef.current);
-    }
-    toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
-  };
 
   useEffect(() => {
     if (activeFichaSection === 'Dados Principais' && selectedFichaMemberId) {
@@ -715,7 +736,7 @@ export default function App() {
   const handleSaveFicha = () => {
     if (selectedFichaMemberId) {
       const newNotification: Notification = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         message: 'Sua ficha individual (Dados Principais) foi atualizada pelo administrador.',
         date: new Date().toISOString(),
         read: false
@@ -753,7 +774,7 @@ export default function App() {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         newAnexos.push({
-          id: crypto.randomUUID(),
+          id: generateId(),
           name: file.name,
           url: base64String,
           type: file.type || 'application/octet-stream',
@@ -764,7 +785,7 @@ export default function App() {
         processedFiles++;
         if (processedFiles === validFiles.length) {
           const newNotification: Notification = {
-            id: crypto.randomUUID(),
+            id: generateId(),
             message: 'Novos anexos foram adicionados à sua ficha.',
             date: new Date().toISOString(),
             read: false
@@ -830,7 +851,7 @@ export default function App() {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         const newNotification: Notification = {
-          id: crypto.randomUUID(),
+          id: generateId(),
           message: 'Sua foto de perfil foi atualizada.',
           date: new Date().toISOString(),
           read: false
@@ -939,7 +960,7 @@ export default function App() {
     }
     if (editingId) {
       const newNotification: Notification = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         message: 'Suas informações funcionais foram atualizadas pelo administrador.',
         date: new Date().toISOString(),
         read: false
@@ -1031,7 +1052,7 @@ export default function App() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const newPdf = {
-          id: crypto.randomUUID(),
+          id: generateId(),
           name: file.name,
           url: reader.result as string
         };
