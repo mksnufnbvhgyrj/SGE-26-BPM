@@ -5,11 +5,14 @@ CREATE TABLE IF NOT EXISTS app_store (
   value JSONB NOT NULL
 );
 
+-- Criar índice para melhorar a performance de consultas por chave
+CREATE INDEX IF NOT EXISTS app_store_key_idx ON app_store(key);
+
 -- Habilitar RLS (Row Level Security)
 ALTER TABLE app_store ENABLE ROW LEVEL SECURITY;
 
--- Criar política para leitura e escrita apenas para usuários autenticados
-CREATE POLICY "Permitir acesso autenticado" ON app_store
+-- Criar política para leitura e escrita para acesso anônimo (ajuste conforme necessário para produção)
+CREATE POLICY "Permitir acesso anonimo" ON app_store
   FOR ALL
-  USING (auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'authenticated');
+  USING (true)
+  WITH CHECK (true);
