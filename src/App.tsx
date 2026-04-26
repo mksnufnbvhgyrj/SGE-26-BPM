@@ -603,7 +603,7 @@ const formatBytes = (bytes: number, decimals = 2) => {
 };
 
 export default function App() {
-  const [authState, setAuthState] = useState<AuthState>({ role: null });
+  const [authState, setAuthState] = useState<AuthState>({ role: 'ADMIN' });
   const [activeAdminTab, setActiveAdminTab] = useState('efetivo');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -1140,9 +1140,6 @@ export default function App() {
     );
   }
 
-  if (authState.role === null) {
-    return <LoginScreen onLogin={setAuthState} members={members} />;
-  }
 
   if (authState.role === 'USER') {
     const liveUser = members.find(m => m.id === authState.user!.id) || authState.user!;
@@ -1191,8 +1188,8 @@ export default function App() {
           </button>
         </nav>
         <div className="p-4 border-t border-slate-800 shrink-0">
-          <button onClick={() => setAuthState({ role: null })} className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2.5 w-full rounded-md hover:bg-slate-800 hover:text-white transition-colors text-left`} title="Sair do Sistema">
-            <LogOut className="w-5 h-5 shrink-0" /> {!isSidebarCollapsed && <span className="whitespace-nowrap">Sair do Sistema</span>}
+          <button className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2.5 w-full rounded-md text-slate-500 cursor-default text-left`}>
+            {!isSidebarCollapsed && <span className="whitespace-nowrap text-xs">SGE v1.0.0</span>}
           </button>
         </div>
       </aside>
@@ -1225,9 +1222,9 @@ export default function App() {
               </button>
             </nav>
             <div className="p-4 border-t border-slate-800 shrink-0">
-              <button onClick={() => setAuthState({ role: null })} className="flex items-center gap-3 px-3 py-2.5 w-full rounded-md hover:bg-slate-800 hover:text-white transition-colors text-left">
-                <LogOut className="w-5 h-5" /> Sair do Sistema
-              </button>
+              <div className="text-center text-slate-500 text-xs py-2">
+                SGE v1.0.0
+              </div>
             </div>
           </aside>
         </div>
