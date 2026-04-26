@@ -73,13 +73,14 @@ interface Audiencia {
 }
 
 const generateId = () => {
-  if (typeof crypto !== 'undefined') {
-    if (crypto.randomUUID) {
-      return crypto.randomUUID();
+  const cryptoObj = typeof globalThis !== 'undefined' ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : undefined);
+  if (cryptoObj) {
+    if (cryptoObj.randomUUID) {
+      return cryptoObj.randomUUID();
     }
-    if (crypto.getRandomValues) {
+    if (cryptoObj.getRandomValues) {
       return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c =>
-        (Number(c) ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> Number(c) / 4).toString(16)
+        (Number(c) ^ cryptoObj.getRandomValues(new Uint8Array(1))[0] & 15 >> Number(c) / 4).toString(16)
       );
     }
   }
@@ -145,7 +146,9 @@ const LoginScreen = ({ onLogin, members }: { onLogin: (auth: AuthState) => void,
 
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminUser === (import.meta.env.VITE_ADMIN_USER || 'admin') && adminPass === (import.meta.env.VITE_ADMIN_PASS || 'admin')) {
+    const envUser = import.meta.env.VITE_ADMIN_USER;
+    const envPass = import.meta.env.VITE_ADMIN_PASS;
+    if (envUser && envPass && adminUser === envUser && adminPass === envPass) {
       onLogin({ role: 'ADMIN' });
     } else {
       console.warn(`Tentativa de login de administrador falhou para usuário: ${adminUser}`);
@@ -618,6 +621,22 @@ export default function App() {
     }
     toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
   };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
