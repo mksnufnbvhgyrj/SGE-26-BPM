@@ -22,7 +22,7 @@ import { LoginScreen } from './components/LoginScreen';
 import { UserDashboard } from './components/UserDashboard';
 
 export default function App() {
-  const [authState, setAuthState] = useState<AuthState>({ role: 'ADMIN' });
+  const [authState, setAuthState] = useState<AuthState>({ role: null }); // CORRIGIDO: agora começa como null para mostrar tela de login
   const [activeAdminTab, setActiveAdminTab] = useState('efetivo');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -444,9 +444,10 @@ export default function App() {
       <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} transition-all duration-300 bg-slate-900 text-slate-300 flex flex-col shrink-0 hidden md:flex relative`}>
         <button 
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          className="absolute -right-3 top-5 bg-slate-800 text-slate-300 hover:text-white rounded-full p-1 border border-slate-700 z-10"
+          className="absolute -right-3 top-5 bg-slate-800 text-slate-300 hover:text-white rounded-full p-2 border border-slate-700 z-10 min-w-[32px] min-h-[32px] flex items-center justify-center"
+          aria-label={isSidebarCollapsed ? "Expandir menu" : "Esconder menu"}
         >
-          {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" aria-hidden="true" /> : <ChevronLeft className="w-4 h-4" aria-hidden="true" />}
         </button>
         <div className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'px-6'} bg-slate-950 text-white font-bold text-lg gap-2 shrink-0 transition-all overflow-hidden whitespace-nowrap`}>
           <span className="bg-blue-600 text-white px-2 py-1 rounded-md text-sm shrink-0">26º</span>
@@ -482,8 +483,8 @@ export default function App() {
                 <span className="bg-blue-600 text-white px-2 py-1 rounded-md text-sm">26º BPM</span>
                 SGE
               </div>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-white" aria-label="Fechar menu">
+                <X className="w-6 h-6" aria-hidden="true" />
               </button>
             </div>
             <nav className="flex-1 py-4 flex flex-col gap-1 px-3 overflow-y-auto">
@@ -514,8 +515,8 @@ export default function App() {
         {/* Top Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0">
           <div className="flex items-center gap-3">
-            <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-md">
-              <Menu className="w-5 h-5" />
+            <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center -ml-2 text-slate-500 hover:bg-slate-100 rounded-md" aria-label="Abrir menu">
+              <Menu className="w-6 h-6" aria-hidden="true" />
             </button>
             <h2 className="text-xl font-bold text-slate-800 hidden sm:block">
               {activeAdminTab === 'efetivo' && 'Controle de Efetivo'}
@@ -650,19 +651,19 @@ export default function App() {
                     </td>
                     <td className="px-4 py-3 border-b border-slate-100 text-center">
                       {item.pdfUrl ? (
-                        <a href={item.pdfUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title={item.pdfName}>
-                          <FileText className="w-4 h-4" />
+                        <a href={item.pdfUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex items-center justify-center p-2 min-w-[44px] min-h-[44px] text-red-500 hover:bg-red-50 rounded transition-colors" title={item.pdfName} aria-label={`Baixar PDF de ${item.nome}`}>
+                          <FileText className="w-5 h-5" aria-hidden="true" />
                         </a>
                       ) : (
-                        <span className="text-slate-300">-</span>
+                        <span className="text-slate-300" aria-hidden="true">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3 border-b border-slate-100 text-right">
-                      <button onClick={(e) => { e.stopPropagation(); openModal(item); }} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1">
-                        <Edit2 className="w-4 h-4" />
+                      <button onClick={(e) => { e.stopPropagation(); openModal(item); }} className="p-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1" aria-label={`Editar ${item.nome}`}>
+                        <Edit2 className="w-5 h-5" aria-hidden="true" />
                       </button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
-                        <Trash2 className="w-4 h-4" />
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="p-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" aria-label={`Excluir ${item.nome}`}>
+                        <Trash2 className="w-5 h-5" aria-hidden="true" />
                       </button>
                     </td>
                   </tr>
@@ -748,22 +749,22 @@ export default function App() {
                         {item.pdfs && item.pdfs.length > 0 ? (
                           <div className="flex items-center justify-center gap-1 flex-wrap">
                             {item.pdfs.map((pdf, idx) => (
-                              <a key={pdf.id} href={pdf.url} target="_blank" rel="noreferrer" className="inline-flex items-center p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title={pdf.name}>
-                                <FileText className="w-4 h-4" />
+                              <a key={pdf.id} href={pdf.url} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center p-2 min-w-[44px] min-h-[44px] text-red-500 hover:bg-red-50 rounded transition-colors" title={pdf.name} aria-label={`Baixar anexo ${idx + 1}`}>
+                                <FileText className="w-5 h-5" aria-hidden="true" />
                                 {item.pdfs!.length > 1 && <span className="text-[10px] ml-0.5 font-bold">{idx + 1}</span>}
                               </a>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-slate-300">-</span>
+                          <span className="text-slate-300" aria-hidden="true">-</span>
                         )}
                       </td>
                       <td className="px-4 py-3 border-b border-slate-100 text-right">
-                        <button onClick={() => openAudienciaModal(item)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1">
-                          <Edit2 className="w-4 h-4" />
+                        <button onClick={() => openAudienciaModal(item)} className="p-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors mr-1" aria-label={`Editar audiência do processo ${item.processo || ''}`}>
+                          <Edit2 className="w-5 h-5" aria-hidden="true" />
                         </button>
-                        <button onClick={() => handleDeleteAudiencia(item.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
-                          <Trash2 className="w-4 h-4" />
+                        <button onClick={() => handleDeleteAudiencia(item.id)} className="p-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" aria-label={`Excluir audiência do processo ${item.processo || ''}`}>
+                          <Trash2 className="w-5 h-5" aria-hidden="true" />
                         </button>
                       </td>
                     </tr>
@@ -842,8 +843,8 @@ export default function App() {
               <h3 className="text-lg font-bold text-slate-900">
                 {editingAudienciaId ? 'Editar Audiência' : 'Agendar Nova Audiência'}
               </h3>
-              <button onClick={closeAudienciaModal} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors">
-                <X className="w-5 h-5" />
+              <button onClick={closeAudienciaModal} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors" aria-label="Fechar modal">
+                <X className="w-6 h-6" aria-hidden="true" />
               </button>
             </div>
             
@@ -944,11 +945,11 @@ export default function App() {
                           {audienciaFormData.pdfs.map(pdf => (
                             <div key={pdf.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-md bg-slate-50">
                               <div className="flex items-center gap-2 overflow-hidden">
-                                <FileText className="w-5 h-5 text-red-500 shrink-0" />
+                                <FileText className="w-5 h-5 text-red-500 shrink-0" aria-hidden="true" />
                                 <span className="text-sm text-slate-700 truncate">{pdf.name}</span>
                               </div>
-                              <button type="button" onClick={() => handleRemoveAudienciaPdf(pdf.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors shrink-0" title="Remover PDF">
-                                <Trash2 className="w-4 h-4" />
+                              <button type="button" onClick={() => handleRemoveAudienciaPdf(pdf.id)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors shrink-0" title="Remover PDF" aria-label={`Remover PDF ${pdf.name}`}>
+                                <Trash2 className="w-5 h-5" aria-hidden="true" />
                               </button>
                             </div>
                           ))}
@@ -987,8 +988,8 @@ export default function App() {
               <h3 className="text-lg font-bold text-slate-900">
                 {editingId ? 'Editar Militar' : 'Adicionar Novo Militar'}
               </h3>
-              <button onClick={closeModal} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors">
-                <X className="w-5 h-5" />
+              <button onClick={closeModal} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors" aria-label="Fechar modal">
+                <X className="w-6 h-6" aria-hidden="true" />
               </button>
             </div>
             

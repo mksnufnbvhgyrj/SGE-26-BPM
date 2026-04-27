@@ -32,60 +32,6 @@ export const fetchAudiencias = async (): Promise<Audiencia[]> => {
   }));
 };
 
-export const updateAudienciasOnSupabase = async (audiencias: Audiencia[]) => {
-  const audienciasData = audiencias.map(a => ({
-    id: a.id,
-    data: a.data,
-    hora: a.hora,
-    local: a.local,
-    processo: a.processo,
-    status: a.status,
-    observacoes: a.observacoes
-  }));
-  
-  const { error: audError } = await supabase.from('audiencias').upsert(audienciasData);
-  if (audError) throw audError;
-  
-  // Members mapping
-  const audienciaMembros: any[] = [];
-  const audienciaPdfs: any[] = [];
-  
-  audiencias.forEach(a => {
-    if (a.policialIds) {
-      a.policialIds.forEach(memberId => {
-        audienciaMembros.push({
-          audiencia_id: a.id,
-          member_id: memberId
-        });
-      });
-    }
-    if (a.pdfs) {
-      a.pdfs.forEach(pdf => {
-        audienciaPdfs.push({
-          id: pdf.id,
-          audiencia_id: a.id,
-          name: pdf.name,
-          url: pdf.url
-        });
-      });
-    }
-  });
-
-  // To properly sync N-M we should delete the old associations and re-insert 
-  // (In production it's better to calculate differences)
-  // But given that we want the app to be resilient and upsertable, we do our best.
-
-  if (audienciaMembros.length > 0) {
-    await supabase.from('audiencia_membros').upsert(audienciaMembros);
-  }
-  
-  if (audienciaPdfs.length > 0) {
-    await supabase.from('audiencia_pdfs').upsert(audienciaPdfs);
-  }
-
-  return audiencias;
-};
-
 export const useAudiencias = (showToast?: (msg: string, type: 'success' | 'danger') => void) => {
   const queryClient = useQueryClient();
   
@@ -96,14 +42,76 @@ export const useAudiencias = (showToast?: (msg: string, type: 'success' | 'dange
   });
 
   const mutation = useMutation({
-    mutationFn: updateAudienciasOnSupabase,
-    onSuccess: (data) => {
-      queryClient.setQueryData(['audiencias'], data);
+    mutationFn: async (newAudiencias: Audiencia[]) => {
+      const oldAudiencias = queryClient.getQueryData<Audiencia[]>(['audiencias']) || [];
+      const newIds = new Set(newAudiencias.map(a => a.id));
+      const deletedIds = oldAudiencias.filter(a => !newIds.has(a.id)).map(a => a.id);
+      
+      // Remove audiências excluídas (cascata deleta audiencia_membros e audiencia_pdfs)
+      if (deletedIds.length > 0) {
+        const { error: delError } = await supabase
+          .from('audiencias')
+          .delete()
+          .in('id', deletedIds);
+        if (delError) throw delError;
+      }
+
+      // Prepara upsert
+      const audienciasData = newAudiencias.map(a => ({
+        id: a.id,
+        data: a.data,
+        hora: a.hora,
+        local: a.local,
+        processo: a.processo,
+        status: a.status,
+        observacoes: a.observacoes
+      }));
+      
+      const { error: audError } = await supabase.from('audiencias').upsert(audienciasData);
+      if (audError) throw audError;
+      
+      // Sincroniza membros e PDFs: para cada audiência, remove associações antigas e reinsere
+      for (const audiencia of newAudiencias) {
+        // Remove associações antigas
+        await supabase.from('audiencia_membros').delete().eq('audiencia_id', audiencia.id);
+        if (audiencia.policialIds && audiencia.policialIds.length > 0) {
+          const membrosData = audiencia.policialIds.map(mid => ({
+            audiencia_id: audiencia.id,
+            member_id: mid
+          }));
+          await supabase.from('audiencia_membros').upsert(membrosData);
+        }
+
+        await supabase.from('audiencia_pdfs').delete().eq('audiencia_id', audiencia.id);
+        if (audiencia.pdfs && audiencia.pdfs.length > 0) {
+          const pdfsData = audiencia.pdfs.map(pdf => ({
+            id: pdf.id,
+            audiencia_id: audiencia.id,
+            name: pdf.name,
+            url: pdf.url
+          }));
+          await supabase.from('audiencia_pdfs').upsert(pdfsData);
+        }
+      }
+
+      return newAudiencias;
     },
-    onError: (error: any) => {
+    onMutate: async (newAudiencias) => {
+      await queryClient.cancelQueries({ queryKey: ['audiencias'] });
+      const previousAudiencias = queryClient.getQueryData<Audiencia[]>(['audiencias']);
+      queryClient.setQueryData(['audiencias'], newAudiencias);
+      return { previousAudiencias };
+    },
+    onError: (error, newAudiencias, context) => {
       console.error('Error syncing audiencias:', error);
+      if (context?.previousAudiencias) {
+        queryClient.setQueryData(['audiencias'], context.previousAudiencias);
+      }
       if (showToast) showToast(`Erro ao salvar audiências: ${error.message || 'Desconhecido'}`, 'danger');
-    }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['audiencias'] });
+    },
   });
 
   return {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Member } from '../types';
+import { Member, Status } from '../types';
 import { Search, FileText, ChevronLeft, X, FileUp, Briefcase, User, Activity, CheckCircle, Paperclip, Download, Trash2, Printer, Info, Layers, ShieldAlert, Crosshair, Stethoscope, History, Award, Users, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, Scale, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, FileSpreadsheet, File } from 'lucide-react';
 import { MemberAvatar } from './MemberAvatar';
 import { DropzoneArea } from './DropzoneArea';
@@ -76,14 +76,15 @@ export const FichaIndividualPanel = ({
               setActiveFichaSection(null);
               setFichaSearch('');
             }}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
-            title="Voltar"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-colors"
+            title="Voltar para Administrativo"
+            aria-label="Voltar para Administrativo"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5" aria-hidden="true" />
           </button>
           <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-600" />
-            <span>Ficha Individual</span>
+            <FileText className="w-5 h-5 text-blue-600" aria-hidden="true" />
+            <span className="text-lg">Ficha Individual</span>
           </div>
         </div>
         
@@ -143,25 +144,37 @@ export const FichaIndividualPanel = ({
             {/* Cabecalho Ficha */}
             <div className="flex justify-between items-start mb-6 pb-4 border-b border-slate-100">
               <div className="flex items-center gap-4">
-                <label className="relative w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold cursor-pointer group overflow-hidden shrink-0">
+                <label
+                  htmlFor="photo-upload"
+                  className="relative w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold cursor-pointer group overflow-hidden shrink-0 outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      document.getElementById('photo-upload')?.click();
+                    }
+                  }}
+                  aria-label="Alterar foto de perfil"
+                >
                   {member.photoUrl ? (
-                    <img src={member.photoUrl} alt={member.nome} className="w-full h-full object-cover" />
+                    <img src={member.photoUrl} alt={`Foto de perfil de ${member.nome}`} className="w-full h-full object-cover" />
                   ) : (
                     member.nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
                   )}
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <FileUp className="w-6 h-6 text-white" />
+                    <FileUp className="w-6 h-6 text-white" aria-hidden="true" />
                   </div>
                   <input 
+                    id="photo-upload"
                     type="file" 
                     accept="image/*" 
-                    className="hidden" 
+                    className="sr-only" 
                     onChange={(e) => handlePhotoUpload(e, member.id)}
                   />
                 </label>
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900">{member.patente} {member.nome}</h2>
-                  <p className="text-slate-500">{member.guerra} | Matrícula: {member.matricula}</p>
+                  <p className="text-slate-600">{member.guerra} <span className="opacity-50">|</span> Matrícula: {member.matricula}</p>
                 </div>
               </div>
               <button 
@@ -169,10 +182,11 @@ export const FichaIndividualPanel = ({
                   setSelectedFichaMemberId(null);
                   setActiveFichaSection(null);
                 }}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-colors"
                 title="Fechar ficha"
+                aria-label="Fechar ficha individual"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
             
@@ -182,10 +196,11 @@ export const FichaIndividualPanel = ({
                   <div className="flex items-center gap-3 pb-4 border-b border-slate-200">
                     <button 
                       onClick={() => setActiveFichaSection(null)}
-                      className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
-                      title="Voltar para seções"
+                      className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-colors"
+                      title="Voltar para o menu de seções"
+                      aria-label="Voltar para o menu de seções"
                     >
-                      <ChevronLeft className="w-5 h-5" />
+                      <ChevronLeft className="w-5 h-5" aria-hidden="true" />
                     </button>
                     <h3 className="text-lg font-bold text-slate-800">{activeFichaSection}</h3>
                   </div>
@@ -317,7 +332,7 @@ export const FichaIndividualPanel = ({
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-slate-500 mb-1">Situação</label>
-                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.status || 'Ativo'} onChange={(e) => setFichaFormData({...fichaFormData, status: e.target.value})}>
+                            <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white" value={fichaFormData.status || 'Ativo'} onChange={(e) => setFichaFormData({...fichaFormData, status: e.target.value as Status})}>
                               <option value="Ativo">Ativo</option>
                               <option value="Férias">Férias</option>
                               <option value="Licença">Licença</option>
@@ -386,12 +401,12 @@ export const FichaIndividualPanel = ({
                                             </div>
                                           </div>
                                         </div>
-                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                          <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Baixar">
-                                            <Download className="w-4 h-4" />
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
+                                          <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Baixar" aria-label="Baixar anexo">
+                                            <Download className="w-5 h-5" aria-hidden="true" />
                                           </a>
-                                          <button onClick={() => handleRemoveAnexo(anexo.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Remover">
-                                            <Trash2 className="w-4 h-4" />
+                                          <button onClick={() => handleRemoveAnexo(anexo.id)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Remover" aria-label="Remover anexo">
+                                            <Trash2 className="w-5 h-5" aria-hidden="true" />
                                           </button>
                                         </div>
                                       </div>
@@ -428,10 +443,13 @@ export const FichaIndividualPanel = ({
                   ))}
                   
                   {/* Botão Especial: Gerar Ficha Individual */}
+                  {/* Botão "Gerar Ficha Individual" desabilitado até implementação */}
                   <button 
-                    className="bg-blue-600 border border-blue-700 rounded-lg p-4 flex flex-col items-center justify-center gap-3 hover:bg-blue-700 text-white transition-colors shadow-sm group"
+                    disabled
+                    className="bg-gray-300 border border-gray-400 rounded-lg p-4 flex flex-col items-center justify-center gap-3 text-gray-500 cursor-not-allowed transition-colors shadow-sm group"
+                    title="Funcionalidade em breve"
                   >
-                    <Printer className="w-8 h-8 text-blue-200 group-hover:text-white transition-colors" />
+                    <Printer className="w-8 h-8 text-gray-400" aria-hidden="true" />
                     <span className="text-sm font-medium text-center leading-tight">Gerar Ficha Individual</span>
                   </button>
                 </div>

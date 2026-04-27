@@ -90,58 +90,7 @@ export const fetchMembers = async (): Promise<Member[]> => {
   return data.map(toCamelCase).sort((a, b) => a.ordem - b.ordem);
 };
 
-export const updateMembersOnSupabase = async (members: Member[]) => {
-  // We use batch upsert for members.
-  const membersData = members.map(toSnakeCase);
-  const { error: membersError } = await supabase.from('members').upsert(membersData);
-  if (membersError) throw membersError;
-
-  // Insert notifications and anexos that might be new
-  const notifications: any[] = [];
-  const anexos: any[] = [];
-  
-  members.forEach(m => {
-    if (m.notifications) {
-      m.notifications.forEach(n => {
-        notifications.push({
-          id: n.id,
-          member_id: m.id,
-          message: n.message,
-          date: n.date,
-          read: n.read
-        });
-      });
-    }
-    if (m.anexos) {
-      m.anexos.forEach(a => {
-        anexos.push({
-          id: a.id,
-          member_id: m.id,
-          name: a.name,
-          url: a.url,
-          type: a.type,
-          date: a.date,
-          size: a.size
-        });
-      });
-    }
-  });
-
-  if (notifications.length > 0) {
-    const { error } = await supabase.from('notifications').upsert(notifications);
-    if (error) throw error;
-  }
-  
-  if (anexos.length > 0) {
-    const { error } = await supabase.from('anexos').upsert(anexos);
-    if (error) throw error;
-  }
-
-  return members;
-};
-
 export const useMembers = (showToast?: (msg: string, type: 'success' | 'danger') => void) => {
-
   const queryClient = useQueryClient();
   
   const query = useQuery({
@@ -151,14 +100,83 @@ export const useMembers = (showToast?: (msg: string, type: 'success' | 'danger')
   });
 
   const mutation = useMutation({
-    mutationFn: updateMembersOnSupabase,
-    onSuccess: (data) => {
-      queryClient.setQueryData(['members'], data);
+    mutationFn: async (newMembers: Member[]) => {
+      const oldMembers = queryClient.getQueryData<Member[]>(['members']) || [];
+      const newIds = new Set(newMembers.map(m => m.id));
+      const deletedIds = oldMembers.filter(m => !newIds.has(m.id)).map(m => m.id);
+      
+      // Exclui membros removidos (cascata deleta notificações e anexos)
+      if (deletedIds.length > 0) {
+        const { error: delError } = await supabase
+          .from('members')
+          .delete()
+          .in('id', deletedIds);
+        if (delError) throw delError;
+      }
+
+      // Prepara dados para upsert
+      const membersData = newMembers.map(toSnakeCase);
+      const { error: membersError } = await supabase.from('members').upsert(membersData);
+      if (membersError) throw membersError;
+
+      // Insere/atualiza notificações e anexos
+      const notifications: any[] = [];
+      const anexos: any[] = [];
+      
+      newMembers.forEach(m => {
+        if (m.notifications) {
+          m.notifications.forEach(n => {
+            notifications.push({
+              id: n.id,
+              member_id: m.id,
+              message: n.message,
+              date: n.date,
+              read: n.read
+            });
+          });
+        }
+        if (m.anexos) {
+          m.anexos.forEach(a => {
+            anexos.push({
+              id: a.id,
+              member_id: m.id,
+              name: a.name,
+              url: a.url,
+              type: a.type,
+              date: a.date,
+              size: a.size
+            });
+          });
+        }
+      });
+
+      if (notifications.length > 0) {
+        const { error } = await supabase.from('notifications').upsert(notifications);
+        if (error) throw error;
+      }
+      if (anexos.length > 0) {
+        const { error } = await supabase.from('anexos').upsert(anexos);
+        if (error) throw error;
+      }
+
+      return newMembers;
     },
-    onError: (error: any) => {
+    onMutate: async (newMembers) => {
+      await queryClient.cancelQueries({ queryKey: ['members'] });
+      const previousMembers = queryClient.getQueryData<Member[]>(['members']);
+      queryClient.setQueryData(['members'], newMembers);
+      return { previousMembers };
+    },
+    onError: (error, newMembers, context) => {
       console.error('Error syncing members:', error);
+      if (context?.previousMembers) {
+        queryClient.setQueryData(['members'], context.previousMembers);
+      }
       if (showToast) showToast(`Erro ao salvar efetivo: ${error.message || 'Desconhecido'}`, 'danger');
-    }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+    },
   });
 
   return {

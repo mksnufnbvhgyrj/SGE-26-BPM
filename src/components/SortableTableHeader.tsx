@@ -10,7 +10,7 @@ interface SortableTableHeaderProps {
   className?: string;
 }
 
-export const SortableTableHeader = ({ label, field, currentSortField, sortDirection, onSort, className = '' }: SortableTableHeaderProps) => {
+export const SortableTableHeader: React.FC<SortableTableHeaderProps> = ({ label, field, currentSortField, sortDirection, onSort, className = '' }) => {
   return (
     <th 
       className={`px-4 py-3 text-left font-semibold cursor-pointer select-none group border-b border-slate-200 ${className}`} 

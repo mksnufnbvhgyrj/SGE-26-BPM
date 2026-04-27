@@ -38,9 +38,10 @@ export const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsA
           <div className="relative">
             <button 
               onClick={handleNotificationsClick}
-              className="relative p-2.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+              className="relative p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              aria-label={`Notificações. ${unreadCount} não lidas`}
             >
-              <Bell className="w-5 h-5" />
+              <Bell className="w-6 h-6" aria-hidden="true" />
               {unreadCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
               )}
@@ -169,8 +170,8 @@ export const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsA
                             {item.pdfs && item.pdfs.length > 0 ? (
                               <div className="flex items-center justify-center gap-1 flex-wrap">
                                 {item.pdfs.map((pdf, idx) => (
-                                  <a key={pdf.id} href={pdf.url} target="_blank" rel="noreferrer" className="inline-flex items-center p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title={pdf.name}>
-                                    <FileText className="w-4 h-4" />
+                                  <a key={pdf.id} href={pdf.url} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 text-red-500 hover:bg-red-50 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" title={pdf.name} aria-label={`Baixar pdf ${idx + 1}`}>
+                                    <FileText className="w-5 h-5" aria-hidden="true" />
                                     {item.pdfs!.length > 1 && <span className="text-[10px] ml-0.5 font-bold">{idx + 1}</span>}
                                   </a>
                                 ))}
@@ -231,9 +232,9 @@ export const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsA
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pl-2">
-                            <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Baixar">
-                              <Download className="w-4 h-4" />
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pl-2 focus-within:opacity-100">
+                            <a href={anexo.url} target="_blank" rel="noreferrer" download={anexo.name} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" title="Baixar" aria-label={`Baixar anexo ${anexo.name}`}>
+                              <Download className="w-5 h-5" aria-hidden="true" />
                             </a>
                           </div>
                         </div>
@@ -322,7 +323,7 @@ export const UserDashboard = ({ user, audiencias, onLogout, onMarkNotificationsA
             
             {user.pdfUrl && (
               <div className="p-4 border-t border-slate-100 bg-slate-50">
-                <a href={user.pdfUrl} target="_blank" rel="noreferrer" className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all group">
+                <a href={user.pdfUrl} target="_blank" rel="noreferrer" className="flex items-center justify-between bg-white p-3 min-h-[64px] rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Baixar Documento Principal">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-red-50 text-red-600 rounded-lg group-hover:bg-red-100 transition-colors">
                       <FileText className="w-5 h-5" />
