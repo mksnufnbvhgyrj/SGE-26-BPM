@@ -89,8 +89,13 @@ export const FichaIndividualPanel = ({
         </div>
         
         <div className="flex flex-wrap gap-2 w-full md:w-auto relative">
-          <select className="w-full md:w-auto min-w-[140px] px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50 text-slate-500" disabled title="Filtro futuro">
-            <option>Filtrar por...</option>
+          <select 
+            className="w-full md:w-auto min-w-[140px] px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50 text-slate-500" 
+            disabled 
+            title="Filtro futuro"
+            aria-label="Filtrar membros (Funcionalidade em breve)"
+          >
+            <option>Filtrar por... (Em breve)</option>
           </select>
           <div className="relative flex-1 md:w-auto md:min-w-[300px]">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -443,14 +448,17 @@ export const FichaIndividualPanel = ({
                   ))}
                   
                   {/* Botão Especial: Gerar Ficha Individual */}
-                  {/* Botão "Gerar Ficha Individual" desabilitado até implementação */}
                   <button 
                     disabled
-                    className="bg-gray-300 border border-gray-400 rounded-lg p-4 flex flex-col items-center justify-center gap-3 text-gray-500 cursor-not-allowed transition-colors shadow-sm group"
+                    className="bg-gray-300 border border-gray-400 rounded-lg p-4 flex flex-col items-center justify-center gap-3 text-gray-500 cursor-not-allowed shadow-sm"
                     title="Funcionalidade em breve"
+                    aria-label="Gerar Ficha Individual (Funcionalidade em breve)"
                   >
-                    <Printer className="w-8 h-8 text-gray-400" aria-hidden="true" />
-                    <span className="text-sm font-medium text-center leading-tight">Gerar Ficha Individual</span>
+                    <Printer className="w-8 h-8 text-gray-400" />
+                    <div className="flex flex-col items-center">
+                      <span className="text-sm font-medium text-center leading-tight">Gerar Ficha Individual</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-400 text-gray-200 px-1.5 py-0.5 rounded mt-1">Em breve</span>
+                    </div>
                   </button>
                 </div>
               )}

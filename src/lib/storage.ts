@@ -6,11 +6,8 @@ export const uploadFile = async (file: File, bucketParam: string = 'documentos')
   const filePath = `${fileName}`;
 
   const { error } = await supabase.storage.from(bucketParam).upload(filePath, file);
-
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
   const { data } = supabase.storage.from(bucketParam).getPublicUrl(filePath);
   return data.publicUrl;
-};
+}

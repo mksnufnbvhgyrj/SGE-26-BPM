@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
-import { Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, ArrowUpDown, FolderOpen, FileText, BarChart3, FileUp, Settings, LogOut, Menu, Scale, ChevronLeft, ChevronRight, Briefcase, User, Info, Layers, ShieldAlert, Crosshair, Paperclip, Stethoscope, History, Award, GraduationCap, Baby, Archive, Medal, Shirt, Palmtree, HeartPulse, Hospital, MapPin, CalendarOff, Calculator, TrendingUp, ChevronsUp, Dumbbell, Clock as ClockIcon, BookOpen, Microscope, Printer, Bell, FileSpreadsheet, File, Upload, UploadCloud, Phone, Mail } from 'lucide-react';
+import { 
+  Search, Download, Plus, Edit2, Trash2, Users, CheckCircle, Sun, Activity, X, 
+  FolderOpen, FileText, Settings, Menu, Scale, ChevronLeft, ChevronRight, 
+  Briefcase, FileUp 
+} from 'lucide-react';
 
 import { Status, Notification, Anexo, Member, AudienciaPdf, Audiencia, AuthRole, AuthState } from './types';
 
@@ -9,9 +13,12 @@ import { INITIAL_AUDIENCIAS, INITIAL_DATA, PATENTES } from './utils/constants';
 import { Clock } from './components/Clock';
 import { useMembers } from './hooks/useMembers';
 import { useAudiencias } from './hooks/useAudiencias';
+import { useQueryClient } from '@tanstack/react-query';
+
 import { useSearchFilter } from './hooks/useSearchFilter';
 import { formatBytes } from './utils/formatters';
 import { uploadFile } from './lib/storage';
+import { extractTextFromPDF, analyzeAudienciaText } from './lib/pdfExtractor';
 import { DropzoneArea } from './components/DropzoneArea';
 import { StatusBadge } from './components/StatusBadge';
 import { MemberAvatar } from './components/MemberAvatar';
@@ -37,12 +44,29 @@ export default function App() {
     toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
   };
 
+  const queryClient = useQueryClient();
   const { members = [], updateMembers, isLoading: loadingMembers } = useMembers(showToast);
   const { audiencias = [], updateAudiencias, isLoading: loadingAudiencias } = useAudiencias(showToast);
+
   const isLoadingData = loadingMembers || loadingAudiencias;
   
-  const setMembers = updateMembers;
-  const setAudiencias = updateAudiencias;
+  const setMembers = (updater: Member[] | ((prev: Member[]) => Member[])) => {
+    if (typeof updater === 'function') {
+      const current = queryClient.getQueryData<Member[]>(['members']) || members;
+      updateMembers(updater(current));
+    } else {
+      updateMembers(updater);
+    }
+  };
+
+  const setAudiencias = (updater: Audiencia[] | ((prev: Audiencia[]) => Audiencia[])) => {
+    if (typeof updater === 'function') {
+      const current = queryClient.getQueryData<Audiencia[]>(['audiencias']) || audiencias;
+      updateAudiencias(updater(current));
+    } else {
+      updateAudiencias(updater);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -77,6 +101,42 @@ export default function App() {
   const [selectedFichaMemberId, setSelectedFichaMemberId] = useState<number | null>(null);
   const [activeFichaSection, setActiveFichaSection] = useState<string | null>(null);
   const [fichaFormData, setFichaFormData] = useState<Partial<Member>>({});
+  const [isExtractingPDF, setIsExtractingPDF] = useState(false);
+
+  const handlePDFDataImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('O arquivo excede o limite de 10MB.', 'danger');
+      return;
+    }
+    setIsExtractingPDF(true);
+    try {
+      const text = await extractTextFromPDF(file);
+      const extracted = analyzeAudienciaText(text, members);
+      setAudienciaFormData(prev => ({
+        ...prev,
+        data: extracted.data || prev.data,
+        hora: extracted.hora || prev.hora,
+        local: extracted.local || prev.local,
+        processo: extracted.processo || prev.processo,
+        policialIds: extracted.policialMatches.length > 0
+          ? [...new Set([...(prev.policialIds || []), ...extracted.policialMatches])]
+          : prev.policialIds,
+      }));
+      if (extracted.data || extracted.hora || extracted.local || extracted.processo) {
+        showToast('Dados extraídos com sucesso! Verifique as informações.', 'success');
+      } else {
+        showToast('Não foi possível extrair dados automaticamente. Preencha manualmente.', 'danger');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao processar PDF. Verifique se o arquivo é válido e contém texto.', 'danger');
+    } finally {
+      setIsExtractingPDF(false);
+      e.target.value = '';
+    }
+  };
 
   useEffect(() => {
     if (activeFichaSection === 'Dados Principais' && selectedFichaMemberId) {
@@ -652,7 +712,7 @@ export default function App() {
                     <td className="px-4 py-3 border-b border-slate-100 text-center">
                       {item.pdfUrl ? (
                         <a href={item.pdfUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex items-center justify-center p-2 min-w-[44px] min-h-[44px] text-red-500 hover:bg-red-50 rounded transition-colors" title={item.pdfName} aria-label={`Baixar PDF de ${item.nome}`}>
-                          <FileText className="w-5 h-5" aria-hidden="true" />
+                           <FileText className="w-5 h-5" aria-hidden="true" />
                         </a>
                       ) : (
                         <span className="text-slate-300" aria-hidden="true">-</span>
@@ -840,9 +900,26 @@ export default function App() {
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-300">
             <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center shrink-0">
-              <h3 className="text-lg font-bold text-slate-900">
-                {editingAudienciaId ? 'Editar Audiência' : 'Agendar Nova Audiência'}
-              </h3>
+              <div className="flex items-center gap-3">
+                <h3 className="text-lg font-bold text-slate-900">
+                  {editingAudienciaId ? 'Editar Audiência' : 'Agendar Nova Audiência'}
+                </h3>
+                {!isExtractingPDF ? (
+                  <label className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 cursor-pointer transition-colors" title="Importar dados de um PDF de intimação">
+                    <FileUp className="w-4 h-4" />
+                    Importar PDF
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      className="hidden"
+                      onChange={handlePDFDataImport}
+                      disabled={isExtractingPDF}
+                    />
+                  </label>
+                ) : (
+                  <div className="text-xs text-blue-600 animate-pulse">Processando PDF...</div>
+                )}
+              </div>
               <button onClick={closeAudienciaModal} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors" aria-label="Fechar modal">
                 <X className="w-6 h-6" aria-hidden="true" />
               </button>

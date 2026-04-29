@@ -13,7 +13,7 @@ export const useSearchFilter = <T,>(
 
   const handleSort = (field: keyof T) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortField(field);
       setSortDirection('asc');
@@ -27,31 +27,25 @@ export const useSearchFilter = <T,>(
   const filteredAndSortedItems = useMemo(() => {
     return items
       .filter(item => {
-        const matchesSearch = searchTerm === '' || searchFields.some(field => {
+        const matchesSearch = !searchTerm || searchFields.some(field => {
           const value = item[field];
           return value ? String(value).toLowerCase().includes(searchTerm.toLowerCase()) : false;
         });
-        
         const matchesFilters = Object.entries(filters).every(([key, val]) => {
           if (!val || val === '' || val === 'Todos' || val === 'Todas') return true;
-          return (item as any)[key] === val;
+          return String((item as any)[key]) === val;
         });
-        
         return matchesSearch && matchesFilters;
       })
       .sort((a, b) => {
         const aVal = a[sortField];
         const bVal = b[sortField];
-        
         if (aVal === undefined || bVal === undefined) return 0;
-        
         if (typeof aVal === 'number' && typeof bVal === 'number') {
           return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
         }
-        
         const aStr = String(aVal).toLowerCase();
         const bStr = String(bVal).toLowerCase();
-        
         if (aStr < bStr) return sortDirection === 'asc' ? -1 : 1;
         if (aStr > bStr) return sortDirection === 'asc' ? 1 : -1;
         return 0;

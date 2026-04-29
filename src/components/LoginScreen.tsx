@@ -15,7 +15,6 @@ export const LoginScreen = ({ onLogin, members }: { onLogin: (auth: AuthState) =
     if (member) {
       onLogin({ role: 'USER', user: member });
     } else {
-      console.warn(`Tentativa de login individual falhou para CPF: ${cpf}`);
       setError('CPF ou Matrícula incorretos.');
     }
   };
@@ -27,7 +26,6 @@ export const LoginScreen = ({ onLogin, members }: { onLogin: (auth: AuthState) =
     if (envUser && envPass && adminUser === envUser && adminPass === envPass) {
       onLogin({ role: 'ADMIN' });
     } else {
-      console.warn(`Tentativa de login de administrador falhou para usuário: ${adminUser}`);
       setError('Usuário ou senha incorretos.');
     }
   };

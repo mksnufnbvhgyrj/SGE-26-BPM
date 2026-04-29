@@ -1,9 +1,7 @@
 import React from 'react';
 
 export const MemberAvatar = ({ name, photoUrl, size = 'md', className = '' }: { name: string, photoUrl?: string, size?: 'sm' | 'md' | 'lg' | 'xl', className?: string }) => {
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
-  };
+  const getInitials = (name: string) => name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 
   const sizeClasses = {
     sm: 'w-8 h-8 text-xs',
